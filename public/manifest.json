@@ -1,0 +1,15 @@
+{
+  "name": "Dynime",
+  "short_name": "Dynime",
+  "description": "All-in-one business management platform",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0f0a1e",
+  "theme_color": "#7c3aed",
+  "orientation": "any",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/dynime-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/apple-touch-icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

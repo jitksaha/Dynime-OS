@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_gateway_configs ADD COLUMN IF NOT EXISTS logo_url text;

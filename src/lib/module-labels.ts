@@ -1,0 +1,53 @@
+/** Maps internal module keys to user-facing display labels. */
+export const MODULE_DISPLAY_NAMES: Record<string, string> = {
+  hrms: "HRM",
+  crm: "CRM",
+  marketing: "Marketing",
+  workflows: "Workflows",
+  accounting: "Accounting",
+  helpdesk: "Helpdesk",
+  projects: "Projects",
+  documents: "Documents",
+  reports: "Reports",
+  wallet: "Pay",
+  pdm: "POS",
+  product_hub: "POS",
+  pos: "POS",
+  calendar: "Calendar",
+  team_chat: "Team Chat",
+  inventory: "Inventory",
+  procurement: "Procurement",
+  okr: "OKR & Goals",
+  assets: "Assets",
+  contracts: "Contracts",
+  logistics: "Logistics",
+  compliance: "Compliance",
+  ai_assistant: "AI Assistant",
+  bookings: "Booking",
+  e_signatures: "E-Signatures",
+  knowledge_base: "Knowledge Base",
+  // Phase 2 modules
+  client_portal: "Client Portal",
+  feedback_nps: "Feedback & NPS",
+  loyalty: "Loyalty & Rewards",
+  referral_program: "Referral Program",
+  field_service: "Field Service",
+  shift_planner: "Shift Planner",
+  sla_manager: "SLA Manager",
+  doc_automation: "Document Automation",
+  resource_planner: "Resource Planner",
+  quality_control: "Quality Control",
+  collections: "Collections & Dunning",
+  sub_analytics: "Subscription Analytics",
+  treasury: "Multi-Currency Treasury",
+  revenue_recognition: "Revenue Recognition",
+  expense_claims: "Expense Claims",
+  financial_forecasting: "Financial Forecasting",
+  appointment_reminders: "Appointment Reminders",
+  remote_tracking: "Remote Work Tracker",
+};
+
+/** Returns the display label for a module key. Falls back to capitalized key. */
+export function getModuleDisplayName(key: string): string {
+  return MODULE_DISPLAY_NAMES[key.toLowerCase()] ?? key.charAt(0).toUpperCase() + key.slice(1);
+}

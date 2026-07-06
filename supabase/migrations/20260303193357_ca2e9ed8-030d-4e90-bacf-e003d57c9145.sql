@@ -1,0 +1,15 @@
+ALTER TABLE public.employees
+ADD COLUMN IF NOT EXISTS gender text,
+ADD COLUMN IF NOT EXISTS date_of_birth date,
+ADD COLUMN IF NOT EXISTS national_id text,
+ADD COLUMN IF NOT EXISTS address text,
+ADD COLUMN IF NOT EXISTS city text,
+ADD COLUMN IF NOT EXISTS country text,
+ADD COLUMN IF NOT EXISTS emergency_contact_name text,
+ADD COLUMN IF NOT EXISTS emergency_contact_phone text,
+ADD COLUMN IF NOT EXISTS bank_name text,
+ADD COLUMN IF NOT EXISTS bank_account_name text,
+ADD COLUMN IF NOT EXISTS bank_account_number text,
+ADD COLUMN IF NOT EXISTS join_date date,
+ADD COLUMN IF NOT EXISTS contract_end_date date,
+ADD COLUMN IF NOT EXISTS notes text;

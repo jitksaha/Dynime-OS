@@ -1,0 +1,1 @@
+ALTER TABLE public.payment_gateway_configs ADD COLUMN IF NOT EXISTS display_order integer NOT NULL DEFAULT 0;

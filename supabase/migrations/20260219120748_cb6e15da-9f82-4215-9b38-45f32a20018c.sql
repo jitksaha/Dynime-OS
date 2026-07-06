@@ -1,0 +1,1 @@
+ALTER TABLE public.tenant_subscriptions ADD COLUMN IF NOT EXISTS scheduled_plan_id uuid REFERENCES public.subscription_plans(id);

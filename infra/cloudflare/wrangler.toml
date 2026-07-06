@@ -1,0 +1,94 @@
+# Phase 2 — Cloudflare Workers + Hyperdrive + R2 bindings for Dynime OS.
+#
+# This is the single Worker that fronts everything we migrate off Supabase:
+#   - the functions gateway (Phase 5: routes /functions/<name> to ported edge fns)
+#   - the auth service     (Phase 4: /auth/* — login, refresh, oauth, webauthn)
+#   - the data API         (Phase 6: PostgREST-compatible /rest/v1 over Hyperdrive)
+#   - the realtime DO       (Phase 6: /realtime WebSocket via Durable Object)
+#
+# Fill in the IDs marked <…> after you run the `wrangler` create commands in
+# infra/cloudflare/README.md. Nothing here contains secrets — secrets go in
+# `.dev.vars` (local) or `wrangler secret put` (production). See .dev.vars.example.
+
+name = "dynime-os"
+main = "../workers/src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]   # needed for pg / bcrypt / jose
+
+# Enable workers.dev for initial deployment. Once stable, switch to a custom domain:
+#   workers_dev = false
+#   routes = [{ pattern = "api.dynime.com/*", zone_id = "134dca68617d6cca22167e32aef532de" }]
+workers_dev = true
+
+# ==============================================================
+# HYPERDRIVE — commented until provisioned and R2 enabled.
+# Run: wrangler hyperdrive create dynime-pg --connection-string="<NEON_URL>"
+# ==============================================================
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<HYPERDRIVE_ID>"
+
+# ==============================================================
+# R2 — commented until R2 is enabled in Cloudflare Dashboard.
+# Run: wrangler r2 bucket create dynime-storage
+# ==============================================================
+# [[r2_buckets]]
+# binding = "STORAGE"
+# bucket_name = "dynime-storage"
+# preview_bucket_name = "dynime-storage-preview"
+
+# ==============================================================
+# DURABLE OBJECTS — commented until plan supports DO or is upgraded.
+# Use `new_sqlite_classes` migration on free plan.
+# ==============================================================
+# [[durable_objects.bindings]]
+# name = "REALTIME"
+# class_name = "RealtimeChannel"
+#
+# [[migrations]]
+# tag = "v1"
+# new_sqlite_classes = ["RealtimeChannel"]
+
+# ---------------------------------------------------------------------------
+# KV — short-lived state: auth refresh-token rotation, rate-limit counters,
+# OAuth/WebAuthn challenge nonces, AI-model-list cache.
+# Create it with:  wrangler kv namespace create dynime-cache
+# ---------------------------------------------------------------------------
+[[kv_namespaces]]
+binding = "CACHE"
+id = "8b963d52e0a740a3a2f1660f50b5912d"
+
+# ---------------------------------------------------------------------------
+# Cron Triggers — replace Supabase pg_cron jobs. Add one schedule per job you
+# had in pg_cron; the handler in workers/src/cron.ts dispatches on event.cron.
+# ---------------------------------------------------------------------------
+[triggers]
+crons = [
+  # "*/5 * * * *",   # example: recurring-billing sweep — enable as you port jobs
+]
+
+# ---------------------------------------------------------------------------
+# Non-secret vars. Secrets (JWT signing key, service tokens) live in .dev.vars
+# / `wrangler secret put` and are NOT committed.
+# ---------------------------------------------------------------------------
+[vars]
+ENVIRONMENT = "production"
+APP_URL = "https://dynime.com"
+# R2 public base used when rewriting stored Storage URLs -> R2 (Phase 3).
+R2_PUBLIC_BASE = "https://storage.dynime.com"
+
+# ---------------------------------------------------------------------------
+# Static site (Cloudflare Pages) is deployed separately from this Worker.
+# See infra/cloudflare/README.md for the Pages build settings.
+# ---------------------------------------------------------------------------
+
+[observability]
+enabled = true
+
+# Staging environment override — same bindings, separate ids/buckets.
+[env.staging]
+name = "dynime-os-staging"
+[env.staging.vars]
+ENVIRONMENT = "staging"
+APP_URL = "https://staging.dynime.com"
+R2_PUBLIC_BASE = "https://storage-staging.dynime.com"

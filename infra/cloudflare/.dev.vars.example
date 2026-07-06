@@ -1,0 +1,50 @@
+# Phase 2 — Local secrets for `wrangler dev`. Copy to `.dev.vars` and fill in.
+# `.dev.vars` is gitignored. For production, set each with:
+#   wrangler secret put <NAME>
+#
+# NONE of these belong in wrangler.toml or the frontend bundle.
+
+# --- Postgres (used by `wrangler dev` to bypass Hyperdrive locally) -----------
+# In production the Worker reads HYPERDRIVE.connectionString from the binding;
+# locally, point straight at your dev/branch database.
+WRANGLER_HYPERDRIVE_LOCAL="postgres://USER:PASS@HOST:5432/dynime"
+
+# --- Auth (Phase 4) -----------------------------------------------------------
+# Signing key for the session JWTs our auth Worker issues (replaces Supabase JWT).
+# Generate: openssl rand -base64 48
+JWT_SECRET="<generate-with-openssl-rand-base64-48>"
+JWT_ISSUER="https://dynime.com"
+# Access token lifetime (s) / refresh token lifetime (s).
+JWT_ACCESS_TTL="3600"
+JWT_REFRESH_TTL="2592000"
+
+# OAuth providers (social-oauth-init/callback replacement).
+GOOGLE_OAUTH_CLIENT_ID=""
+GOOGLE_OAUTH_CLIENT_SECRET=""
+APPLE_OAUTH_CLIENT_ID=""
+APPLE_OAUTH_CLIENT_SECRET=""
+
+# WebAuthn (webauthn-challenge replacement).
+WEBAUTHN_RP_ID="dynime.com"
+WEBAUTHN_RP_NAME="Dynime"
+WEBAUTHN_ORIGIN="https://dynime.com"
+
+# --- Service role -------------------------------------------------------------
+# Token the gateway/cron present to run privileged DB work (BYPASSRLS path).
+# This is the off-Supabase replacement for the service-role key. Generate fresh.
+SERVICE_ROLE_TOKEN="<generate-with-openssl-rand-base64-48>"
+
+# --- Email (Phase 5: send-custom-email / send-auth-email) ---------------------
+# nodemailer is NOT Workers-compatible. Use an HTTP email API instead.
+# MailChannels (free from Workers) needs no key; a provider like Resend/Postmark does.
+EMAIL_PROVIDER="mailchannels"       # mailchannels | resend | postmark
+EMAIL_API_KEY=""                    # required for resend/postmark
+EMAIL_FROM="no-reply@dynime.com"
+EMAIL_FROM_NAME="Dynime"
+
+# --- One-time migration (Phase 3) ---------------------------------------------
+# Only needed by the infra/migrate scripts, not the Worker runtime.
+# Kept here for convenience; remove after the cutover.
+SUPABASE_DB_URL="postgres://postgres:DB_PASSWORD@db.msibxlvqeydgmlofwlbx.supabase.co:5432/postgres"
+SUPABASE_SERVICE_ROLE_KEY=""
+SUPABASE_PROJECT_REF="msibxlvqeydgmlofwlbx"

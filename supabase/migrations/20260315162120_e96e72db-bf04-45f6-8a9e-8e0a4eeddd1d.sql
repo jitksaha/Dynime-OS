@@ -1,0 +1,1 @@
+ALTER TABLE public.user_roles ALTER COLUMN tenant_id DROP NOT NULL;

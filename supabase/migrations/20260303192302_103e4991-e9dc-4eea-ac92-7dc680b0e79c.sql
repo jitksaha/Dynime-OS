@@ -1,0 +1,1 @@
+ALTER TABLE public.employees ADD COLUMN IF NOT EXISTS employment_type text NOT NULL DEFAULT 'Permanent';

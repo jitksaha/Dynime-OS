@@ -1,0 +1,1 @@
+ALTER TABLE public.pdm_products ADD COLUMN IF NOT EXISTS barcode TEXT DEFAULT NULL;

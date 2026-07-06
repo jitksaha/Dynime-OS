@@ -1,0 +1,1 @@
+UPDATE public.social_signin_providers SET is_enabled = true WHERE provider_key IN ('google', 'apple', 'facebook', 'github', 'twitter', 'linkedin', 'microsoft', 'discord');

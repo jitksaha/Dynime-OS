@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynime – Full Product Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060A12;--surf:#0C1526;--surf2:#111E38;--surf3:#162444;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --blue:#3B7EFF;--teal:#00D4AA;--red:#FF5F5F;--yellow:#FFB547;--purple:#A78BFA;
+  --text:#E8EDF8;--muted:#5E7299;--muted2:#8A9DC0;
+  --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;
+  --r:10px;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;font-family:var(--fb);color:var(--text)}
+
+/* ══ STAGE ══ */
+#stage{
+  width:960px;height:540px;position:relative;overflow:hidden;
+  border-radius:16px;background:var(--bg);
+  box-shadow:0 60px 160px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.08);
+}
+
+/* ══ SCENE SYSTEM ══ */
+.scene{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .7s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.scene.active{opacity:1;pointer-events:all}
+.scene.exit{opacity:0;transition:opacity .5s ease}
+
+/* ══ AMBIENT BG ══ */
+#ambient{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:0;transition:opacity 1.4s ease,transform 4s ease}
+#b1{width:500px;height:500px;background:radial-gradient(circle,rgba(59,126,255,.3) 0%,transparent 70%);top:-150px;left:-120px}
+#b2{width:420px;height:420px;background:radial-gradient(circle,rgba(0,212,170,.25) 0%,transparent 70%);bottom:-100px;right:-80px}
+#b3{width:350px;height:350px;background:radial-gradient(circle,rgba(167,139,250,.2) 0%,transparent 70%);top:80px;right:80px}
+#b4{width:300px;height:300px;background:radial-gradient(circle,rgba(255,95,95,.18) 0%,transparent 70%);bottom:40px;left:120px}
+.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:64px 64px;opacity:0;transition:opacity 1.2s ease}
+
+/* ══ PARTICLES ══ */
+.pt{position:absolute;border-radius:50%;pointer-events:none;animation:pt-float linear infinite}
+@keyframes pt-float{0%{opacity:0;transform:translateY(0) scale(.4)}15%{opacity:.7}85%{opacity:.3}100%{opacity:0;transform:translateY(-120px) scale(1.2)}}
+
+/* ══ TYPOGRAPHY ══ */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;border:1px solid;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px;opacity:0;transition:opacity .6s ease .15s}
+.chip.show{opacity:1}
+.chip-blue{background:rgba(59,126,255,.1);border-color:rgba(59,126,255,.3);color:var(--blue)}
+.chip-teal{background:rgba(0,212,170,.1);border-color:rgba(0,212,170,.3);color:var(--teal)}
+.chip-red{background:rgba(255,95,95,.1);border-color:rgba(255,95,95,.3);color:var(--red)}
+.chip-yellow{background:rgba(255,181,71,.1);border-color:rgba(255,181,71,.3);color:var(--yellow)}
+.chip-purple{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--purple)}
+.pulsedot{width:6px;height:6px;border-radius:50%;animation:pdot 1.4s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+.h1{font-family:var(--fh);font-size:52px;font-weight:800;letter-spacing:-1.5px;line-height:1.05;text-align:center;opacity:0;transform:translateY(20px);transition:opacity .8s cubic-bezier(.16,1,.3,1) .1s,transform .8s cubic-bezier(.16,1,.3,1) .1s}
+.h1.show{opacity:1;transform:none}
+.h2{font-family:var(--fh);font-size:36px;font-weight:800;letter-spacing:-1px;line-height:1.1;text-align:center;opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.16,1,.3,1) .1s,transform .7s cubic-bezier(.16,1,.3,1) .1s}
+.h2.show{opacity:1;transform:none}
+.sub{font-size:15px;color:var(--muted2);text-align:center;max-width:460px;line-height:1.7;margin-top:12px;opacity:0;transition:opacity .7s ease .4s}
+.sub.show{opacity:1}
+.hlblue{color:var(--blue)}.hlteal{color:var(--teal)}.hlred{color:var(--red)}.hlyellow{color:var(--yellow)}.hlpurple{color:var(--purple)}
+
+/* ══ CARD ══ */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.card2{background:var(--surf2);border:1px solid var(--border);border-radius:8px}
+
+/* ══ SCENE PANEL ══ */
+.panel{width:760px;margin-top:24px;opacity:0;transform:translateY(18px) scale(.98);transition:opacity .8s cubic-bezier(.16,1,.3,1) .45s,transform .8s cubic-bezier(.16,1,.3,1) .45s;box-shadow:0 24px 80px rgba(0,0,0,.55)}
+.panel.show{opacity:1;transform:none}
+
+/* ══ TOPBAR ══ */
+.topbar{height:36px;display:flex;align-items:center;padding:0 14px;gap:8px;background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);flex-shrink:0}
+.tb-dot{width:9px;height:9px;border-radius:50%}
+.tb-search{flex:1;max-width:180px;height:22px;background:var(--surf2);border:1px solid var(--border);border-radius:5px;margin-left:12px}
+.tb-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#6B9FFF);margin-left:auto}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:54px;background:var(--surf2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:5px;flex-shrink:0}
+.si{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:background .2s}
+.si.on{background:rgba(59,126,255,.18);color:var(--blue)}
+.si:not(.on){color:var(--muted)}
+
+/* ══ STAT CARD ══ */
+.sc{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px}
+.sc-val{font-family:var(--fh);font-size:22px;font-weight:700}
+.sc-chg{font-size:9px;margin-top:3px}
+
+/* ══ TAG ══ */
+.tag{display:inline-flex;padding:2px 8px;border-radius:4px;font-size:8px;font-weight:600;letter-spacing:.04em}
+.tg{background:rgba(0,212,170,.12);color:var(--teal)}
+.tb{background:rgba(59,126,255,.12);color:var(--blue)}
+.tr{background:rgba(255,95,95,.12);color:var(--red)}
+.ty{background:rgba(255,181,71,.12);color:var(--yellow)}
+.tp{background:rgba(167,139,250,.12);color:var(--purple)}
+
+/* ══ BAR CHART ══ */
+.bars{display:flex;align-items:flex-end;gap:5px;height:70px}
+.bar{flex:1;border-radius:3px 3px 0 0;transition:height 1s cubic-bezier(.16,1,.3,1)}
+
+/* ══ PROGRESS BAR ══ */
+.pbar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+.pfill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+
+/* ══ ROW ══ */
+.row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px}
+.row:last-child{border-bottom:none}
+
+/* ══ NOTIF ══ */
+.notif{position:absolute;top:18px;right:18px;background:var(--surf2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;font-size:11px;min-width:200px;max-width:220px;opacity:0;transform:translateX(24px);transition:all .55s cubic-bezier(.16,1,.3,1);box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:10}
+.notif.show{opacity:1;transform:none}
+.ni{font-size:20px}
+.nt{font-weight:600;font-size:11px;line-height:1.3}
+.ns{color:var(--muted2);font-size:9px;margin-top:2px;line-height:1.4}
+
+/* ══ TYPING ══ */
+.typing::after{content:'|';animation:blink .8s step-end infinite;color:var(--blue);margin-left:1px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ══ COUNTER ══ */
+.cnt{display:inline-block}
+
+/* ══ AVATAR ══ */
+.av{border-radius:50%;flex-shrink:0}
+
+/* ══ PROGRESS BAR GLOBAL ══ */
+#gbar{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--teal));width:0;border-radius:0 2px 2px 0;box-shadow:0 0 10px rgba(59,126,255,.6)}
+#gtime{position:absolute;bottom:10px;right:16px;font-size:9px;color:var(--muted);font-family:var(--fh);letter-spacing:.05em}
+
+/* ══ CONTROLS ══ */
+#ctrl{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center}
+.cbtn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.cbtn:hover{background:rgba(255,255,255,.13)}
+#cplay{width:34px;height:34px;background:var(--blue);border-color:transparent}
+#cplay:hover{background:#5590ff}
+.sdot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.15);cursor:pointer;transition:all .25s}
+.sdot.on{background:var(--blue);width:18px;border-radius:3px}
+
+/* ══ SCENE-SPECIFIC ══ */
+
+/* Problem scene */
+.chaos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:660px;margin-top:24px;opacity:0;transition:opacity .7s ease .5s}
+.chaos-grid.show{opacity:1}
+.chaos-card{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.chaos-icon{font-size:24px;margin-bottom:6px}
+.chaos-name{font-size:10px;font-weight:600;color:var(--muted2)}
+.chaos-sub{font-size:8px;color:var(--muted);margin-top:3px}
+.chaos-x{width:20px;height:20px;background:rgba(255,95,95,.2);border:1px solid rgba(255,95,95,.3);border-radius:50%;color:var(--red);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:6px auto 0}
+
+/* Workflow automation */
+.flow-node{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:10px;text-align:center;min-width:100px}
+.flow-arrow{color:var(--muted);font-size:14px;padding:0 4px}
+.flow-row{display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:10px}
+.flow-active{border-color:var(--blue);background:rgba(59,126,255,.1)}
+.flow-teal{border-color:var(--teal);background:rgba(0,212,170,.08)}
+.flow-yellow{border-color:var(--yellow);background:rgba(255,181,71,.08)}
+
+/* Testimonial */
+.test-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:20px 24px;width:220px;opacity:0;transform:translateY(16px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.test-card.show{opacity:1;transform:none}
+.stars{color:var(--yellow);font-size:11px;letter-spacing:1px;margin-bottom:10px}
+.test-q{font-size:11px;line-height:1.65;color:var(--muted2);margin-bottom:12px}
+.test-name{font-size:10px;font-weight:600}
+.test-role{font-size:9px;color:var(--muted)}
+
+/* Pricing */
+.price-card{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:20px;width:190px;opacity:0;transform:translateY(16px);transition:all .6s cubic-bezier(.16,1,.3,1)}
+.price-card.show{opacity:1;transform:none}
+.price-card.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue),0 16px 48px rgba(59,126,255,.25)}
+.price-name{font-family:var(--fh);font-size:13px;font-weight:700;margin-bottom:4px}
+.price-val{font-family:var(--fh);font-size:28px;font-weight:800;margin-bottom:4px}
+.price-per{font-size:9px;color:var(--muted)}
+.price-feat{font-size:9px;color:var(--muted2);line-height:1.8;margin-top:12px}
+.price-feat span{display:block}
+.price-feat span::before{content:'✓ ';color:var(--teal)}
+.price-btn{display:block;text-align:center;margin-top:14px;padding:8px;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer}
+.pbtn-ghost{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)}
+.pbtn-blue{background:var(--blue);color:#fff;border:none;box-shadow:0 6px 20px rgba(59,126,255,.35)}
+
+/* Analytics scene sparkline */
+.spark{display:inline-block;vertical-align:middle}
+
+/* Document scene */
+.doc-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:10px}
+.doc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.doc-name{flex:1;font-weight:500}
+.doc-size{color:var(--muted);font-size:9px}
+
+/* Invoice builder */
+.inv-line{display:flex;gap:8px;align-items:center;font-size:10px;padding:5px 0;border-bottom:1px solid var(--border)}
+
+/* Kanban */
+.kb-col{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px;min-width:0}
+.kb-col-title{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.kb-card{background:var(--surf3);border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px;font-size:10px;cursor:pointer;transition:transform .2s,border-color .2s}
+.kb-card:hover{transform:translateY(-1px);border-color:var(--border2)}
+
+/* Connection line animation */
+@keyframes dash{to{stroke-dashoffset:0}}
+
+/* Number counter animation */
+@keyframes count-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Glow pulse on metric */
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(59,126,255,0)}50%{box-shadow:0 0 20px 4px rgba(59,126,255,.3)}}
+
+/* Scene transition overlay */
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- Ambient -->
+  <div id="ambient">
+    <div class="blob" id="b1"></div>
+    <div class="blob" id="b2"></div>
+    <div class="blob" id="b3"></div>
+    <div class="blob" id="b4"></div>
+    <div class="grid-lines" id="grid"></div>
+  </div>
+
+  <!-- Particles -->
+  <div class="pt" style="width:4px;height:4px;background:var(--blue);left:12%;top:78%;animation-duration:8s;animation-delay:0s"></div>
+  <div class="pt" style="width:3px;height:3px;background:var(--teal);left:78%;top:70%;animation-duration:11s;animation-delay:2s"></div>
+  <div class="pt" style="width:5px;height:5px;background:var(--yellow);left:45%;top:82%;animation-duration:9s;animation-delay:1.5s"></div>
+  <div class="pt" style="width:3px;height:3px;background:var(--purple);left:63%;top:74%;animation-duration:7s;animation-delay:3s"></div>
+  <div class="pt" style="width:4px;height:4px;background:var(--red);left:28%;top:76%;animation-duration:10s;animation-delay:.8s"></div>
+  <div class="pt" style="width:3px;height:3px;background:var(--blue);left:88%;top:65%;animation-duration:12s;animation-delay:4s"></div>
+
+  <!-- Flash -->
+  <div id="flash"></div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 0 · COLD OPEN — THE PROBLEM
+  ══════════════════════════════════════ -->
+  <div class="scene active" id="s0">
+    <div class="chip chip-red" id="s0c"><span class="pulsedot" style="background:var(--red)"></span>The Problem</div>
+    <div class="h2" id="s0h">Running a business means juggling<br><span class="hlred">too many disconnected tools</span></div>
+    <div class="sub" id="s0s">Every team uses a different app. Data is scattered. Nothing talks to each other.</div>
+    <div class="chaos-grid" id="s0g">
+      <div class="chaos-card"><div class="chaos-icon">📧</div><div class="chaos-name">Email Threads</div><div class="chaos-sub">Client comms lost</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">📊</div><div class="chaos-name">Spreadsheets</div><div class="chaos-sub">Manual & error-prone</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">🗂️</div><div class="chaos-name">Separate CRM</div><div class="chaos-sub">Expensive & siloed</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">🧾</div><div class="chaos-name">Accounting App</div><div class="chaos-sub">Not integrated</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">🧑‍💼</div><div class="chaos-name">HR Software</div><div class="chaos-sub">Another subscription</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">📋</div><div class="chaos-name">Project Tools</div><div class="chaos-sub">Team visibility gaps</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">💬</div><div class="chaos-name">Chat Apps</div><div class="chaos-sub">Context always lost</div><div class="chaos-x">✕</div></div>
+      <div class="chaos-card"><div class="chaos-icon">📁</div><div class="chaos-name">File Storage</div><div class="chaos-sub">Version confusion</div><div class="chaos-x">✕</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 1 · LOGO / BRAND REVEAL
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s1">
+    <div style="text-align:center">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--muted2);opacity:0;transition:opacity .7s ease .2s" id="s1pre">Introducing</div>
+      <div style="font-family:var(--fh);font-size:90px;font-weight:800;letter-spacing:-3px;background:linear-gradient(135deg,#fff 0%,var(--blue) 50%,var(--teal) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:scale(.9) translateY(16px);transition:all 1s cubic-bezier(.16,1,.3,1) .45s;line-height:1" id="s1logo">DYNIME</div>
+      <div style="font-size:16px;color:var(--muted2);letter-spacing:.15em;text-transform:uppercase;margin-top:14px;opacity:0;transition:opacity .7s ease 1s" id="s1tag">Simplify Growth Execution</div>
+      <div style="display:flex;gap:28px;justify-content:center;margin-top:36px;opacity:0;transition:opacity .7s ease 1.4s" id="s1stats">
+        <div style="text-align:center"><div style="font-family:var(--fh);font-size:32px;font-weight:800;color:var(--blue)">8+</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Modules</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div style="font-family:var(--fh);font-size:32px;font-weight:800;color:var(--teal)">1</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Platform</div></div>
+        <div style="width:1px;background:var(--border)"></div>
+        <div style="text-align:center"><div style="font-family:var(--fh);font-size:32px;font-weight:800;color:var(--yellow)">∞</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Possibilities</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 2 · DASHBOARD OVERVIEW
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s2">
+    <div class="chip chip-blue" id="s2c"><span class="pulsedot" style="background:var(--blue)"></span>Dashboard</div>
+    <div class="h2" id="s2h">Your entire business, <span class="hlblue">at a glance</span></div>
+    <div class="sub" id="s2s">Real-time KPIs, revenue trends, and team activity — unified in one powerful command center.</div>
+
+    <div class="card panel" id="s2p" style="height:270px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <div class="tb-search"></div>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center;font-size:9px;color:var(--muted)">March 2025 ▾</div>
+        <div class="tb-avatar" style="margin-left:10px"></div>
+      </div>
+      <div style="display:flex;flex:1;overflow:hidden">
+        <div class="sidebar">
+          <div class="si on">⊞</div><div class="si">👥</div><div class="si">🧑‍💼</div><div class="si">💰</div><div class="si">📋</div><div class="si">📁</div><div class="si">⚡</div><div class="si">📊</div>
+        </div>
+        <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+          <!-- Stat column -->
+          <div style="display:flex;flex-direction:column;gap:8px;width:130px;flex-shrink:0">
+            <div class="sc"><div class="sc-lbl">Total Revenue</div><div class="sc-val" style="color:var(--teal)" id="s2v1">$0</div><div class="sc-chg" style="color:var(--teal)">↑ 18.4% vs last month</div></div>
+            <div class="sc"><div class="sc-lbl">Active Clients</div><div class="sc-val" style="color:var(--blue)" id="s2v2">0</div><div class="sc-chg" style="color:var(--blue)">↑ 31 new this month</div></div>
+            <div class="sc"><div class="sc-lbl">Open Tasks</div><div class="sc-val" id="s2v3">0</div><div class="sc-chg" style="color:var(--muted)">Across 6 projects</div></div>
+          </div>
+          <!-- Chart column -->
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div class="card2" style="flex:1.6;padding:10px">
+              <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between">Monthly Revenue <span style="color:var(--teal)">▲ 18%</span></div>
+              <div class="bars" id="s2bars">
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="42%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="55%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="48%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="68%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="62%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="74%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="80%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="71%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="85%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,rgba(59,126,255,.9),rgba(59,126,255,.25))" data-h="92%"></div>
+                <div class="bar" style="height:0%;background:linear-gradient(180deg,var(--teal),rgba(0,212,170,.3));border-top:1px solid var(--teal)" data-h="100%"></div>
+              </div>
+            </div>
+            <div class="card2" style="padding:8px 10px;display:flex;gap:12px">
+              <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+                <div class="row" style="padding:3px 0">
+                  <div class="av" style="width:18px;height:18px;background:linear-gradient(135deg,#3B7EFF,#6B9FFF)"></div>
+                  <div style="flex:1;font-size:9px">TechVentures Ltd.</div><div class="tag tg">Active</div><div style="font-size:9px;color:var(--muted);margin-left:4px">$12.4K</div>
+                </div>
+                <div class="row" style="padding:3px 0">
+                  <div class="av" style="width:18px;height:18px;background:linear-gradient(135deg,#FF5F5F,#FF9494)"></div>
+                  <div style="flex:1;font-size:9px">Nova Solutions</div><div class="tag ty">Pending</div><div style="font-size:9px;color:var(--muted);margin-left:4px">$8.1K</div>
+                </div>
+                <div class="row" style="padding:3px 0">
+                  <div class="av" style="width:18px;height:18px;background:linear-gradient(135deg,#00D4AA,#00FFCC)"></div>
+                  <div style="flex:1;font-size:9px">Spark Digital</div><div class="tag tg">Active</div><div style="font-size:9px;color:var(--muted);margin-left:4px">$6.7K</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Right column -->
+          <div style="width:110px;display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+            <div class="card2" style="padding:10px;text-align:center">
+              <svg width="70" height="70" viewBox="0 0 70 70">
+                <circle cx="35" cy="35" r="28" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="8"/>
+                <circle cx="35" cy="35" r="28" fill="none" stroke="var(--teal)" stroke-width="8" stroke-dasharray="176" stroke-dashoffset="40" stroke-linecap="round" transform="rotate(-90 35 35)" id="s2ring"/>
+                <text x="35" y="38" text-anchor="middle" fill="var(--text)" font-family="Syne" font-size="12" font-weight="700">77%</text>
+              </svg>
+              <div style="font-size:8px;color:var(--muted);margin-top:3px">Goal Achieved</div>
+            </div>
+            <div class="card2" style="padding:8px;text-align:center">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Team Online</div>
+              <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:3px">
+                <div class="av" style="width:16px;height:16px;background:linear-gradient(135deg,#3B7EFF,#6B9FFF)"></div>
+                <div class="av" style="width:16px;height:16px;background:linear-gradient(135deg,#00D4AA,#00FFCC)"></div>
+                <div class="av" style="width:16px;height:16px;background:linear-gradient(135deg,#FFB547,#FFD180)"></div>
+                <div class="av" style="width:16px;height:16px;background:linear-gradient(135deg,#A78BFA,#C4B5FD)"></div>
+                <div class="av" style="width:16px;height:16px;background:linear-gradient(135deg,#FF5F5F,#FF9494)"></div>
+              </div>
+              <div style="font-size:9px;font-weight:600;color:var(--teal);margin-top:4px">+28 online</div>
+            </div>
+            <div class="card2" style="padding:8px">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:5px">Tasks Status</div>
+              <div style="font-size:8px;margin-bottom:3px;display:flex;justify-content:space-between">Done <span style="color:var(--teal)">62%</span></div>
+              <div class="pbar"><div class="pfill" style="width:0%;background:var(--teal)" id="s2pg1" data-w="62%"></div></div>
+              <div style="font-size:8px;margin-bottom:3px;margin-top:5px;display:flex;justify-content:space-between">In Prog <span style="color:var(--blue)">24%</span></div>
+              <div class="pbar"><div class="pfill" style="width:0%;background:var(--blue)" id="s2pg2" data-w="24%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif" id="s2n"><div class="ni">📈</div><div><div class="nt">Revenue milestone!</div><div class="ns">March hit $84.2K — best month ever 🎉</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 3 · CRM — PIPELINE
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s3">
+    <div class="chip chip-blue" id="s3c"><span class="pulsedot" style="background:var(--blue)"></span>CRM Module</div>
+    <div class="h2" id="s3h">Close more deals, <span class="hlblue">faster</span></div>
+    <div class="sub" id="s3s">Visual Kanban pipeline. Track every lead from first contact to signed contract — with full activity history.</div>
+
+    <div class="card panel" id="s3p" style="height:265px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Sales Pipeline</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div style="padding:3px 10px;background:var(--blue);border-radius:5px;font-size:9px;font-weight:600">+ New Deal</div>
+          <div style="padding:3px 10px;background:var(--surf2);border:1px solid var(--border);border-radius:5px;font-size:9px;color:var(--muted)">Filter ▾</div>
+        </div>
+      </div>
+      <div style="display:flex;flex:1;padding:10px;gap:8px;overflow:hidden">
+        <div class="kb-col">
+          <div class="kb-col-title"><span style="width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block"></span>Lead (4)</div>
+          <div class="kb-card"><div style="font-weight:600;margin-bottom:3px">Apex Technologies</div><div style="color:var(--blue);font-size:9px;margin-bottom:3px">$24,000</div><div class="tag tb">Email sent</div></div>
+          <div class="kb-card"><div style="font-weight:600;margin-bottom:3px">BlueWave Inc.</div><div style="color:var(--blue);font-size:9px;margin-bottom:3px">$8,500</div><div class="tag ty">Call booked</div></div>
+          <div class="kb-card" style="opacity:.6"><div style="font-weight:600;margin-bottom:3px">FinEdge Corp.</div><div style="color:var(--blue);font-size:9px">$5,200</div></div>
+        </div>
+        <div class="kb-col">
+          <div class="kb-col-title"><span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block"></span>Qualified (3)</div>
+          <div class="kb-card" style="border-color:rgba(59,126,255,.35)"><div style="font-weight:600;margin-bottom:3px">Meridian Group</div><div style="color:var(--blue);font-size:9px;margin-bottom:3px">$41,000</div><div class="tag tb">Proposal sent</div></div>
+          <div class="kb-card"><div style="font-weight:600;margin-bottom:3px">ClearPath Ltd.</div><div style="color:var(--blue);font-size:9px;margin-bottom:3px">$17,200</div><div class="tag tb">Meeting set</div></div>
+        </div>
+        <div class="kb-col">
+          <div class="kb-col-title"><span style="width:8px;height:8px;border-radius:50%;background:var(--yellow);display:inline-block"></span>Proposal (2)</div>
+          <div class="kb-card"><div style="font-weight:600;margin-bottom:3px">Summit Corp.</div><div style="color:var(--yellow);font-size:9px;margin-bottom:3px">$62,000</div><div class="tag ty">Awaiting review</div></div>
+          <div class="kb-card" style="opacity:.7"><div style="font-weight:600;margin-bottom:3px">Delta Retail</div><div style="color:var(--yellow);font-size:9px">$29,800</div></div>
+        </div>
+        <div class="kb-col">
+          <div class="kb-col-title"><span style="width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block"></span>Won (5) 🎉</div>
+          <div class="kb-card" style="border-color:rgba(0,212,170,.35);background:rgba(0,212,170,.04)"><div style="font-weight:600;margin-bottom:3px">NovaTech Solutions</div><div style="color:var(--teal);font-size:9px;font-weight:700;margin-bottom:3px">$88,000</div><div class="tag tg">Contract signed</div></div>
+          <div class="kb-card" style="border-color:rgba(0,212,170,.2)"><div style="font-weight:600;margin-bottom:3px">Bright Ventures</div><div style="color:var(--teal);font-size:9px;margin-bottom:3px">$34,500</div><div class="tag tg">Onboarding</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif" id="s3n"><div class="ni">🎉</div><div><div class="nt">Deal closed — Won!</div><div class="ns">NovaTech Solutions · $88K contract signed</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 4 · CRM — CONTACT DETAIL
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s4">
+    <div class="chip chip-blue" id="s4c"><span class="pulsedot" style="background:var(--blue)"></span>CRM · Contact View</div>
+    <div class="h2" id="s4h">Every client relationship, <span class="hlblue">deeply tracked</span></div>
+    <div class="sub" id="s4s">Full contact profiles with interaction timeline, notes, linked deals, and communication history.</div>
+
+    <div class="card panel" id="s4p" style="height:255px;display:flex;gap:0">
+      <div class="sidebar"><div class="si">⊞</div><div class="si on">👥</div><div class="si">🧑‍💼</div><div class="si">💰</div></div>
+      <div style="flex:1;display:flex;overflow:hidden">
+        <!-- Contact left -->
+        <div style="width:200px;border-right:1px solid var(--border);padding:14px;flex-shrink:0">
+          <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#3B7EFF,#A78BFA);margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:20px;font-weight:700">A</div>
+          <div style="font-family:var(--fh);font-size:14px;font-weight:700;margin-bottom:2px">Aryan Mehta</div>
+          <div style="font-size:9px;color:var(--muted2);margin-bottom:8px">CEO · NovaTech Solutions</div>
+          <div style="display:flex;gap:5px;margin-bottom:12px"><div class="tag tg">Active Client</div><div class="tag tp">Enterprise</div></div>
+          <div style="font-size:9px;color:var(--muted);line-height:1.9">
+            📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7415060d151a341a1b02150011171c5a1d1b">[email&#160;protected]</a><br>📞 +1 (415) 882-0044<br>🌐 novatech.io<br>📍 San Francisco, CA
+          </div>
+          <div style="margin-top:10px;padding:8px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:7px">
+            <div style="font-size:8px;color:var(--muted)">Total Deal Value</div>
+            <div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--teal)">$88,000</div>
+          </div>
+        </div>
+        <!-- Timeline right -->
+        <div style="flex:1;padding:12px;overflow:hidden">
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px">Activity Timeline</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <div style="display:flex;flex-direction:column;align-items:center"><div style="width:22px;height:22px;border-radius:50%;background:rgba(0,212,170,.15);border:1px solid rgba(0,212,170,.3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">✅</div><div style="flex:1;width:1px;background:var(--border);margin-top:3px"></div></div>
+              <div><div style="font-size:10px;font-weight:600;margin-bottom:1px">Contract Signed</div><div style="font-size:9px;color:var(--muted)">Mar 14, 2025 · $88,000 Enterprise Plan</div></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <div style="display:flex;flex-direction:column;align-items:center"><div style="width:22px;height:22px;border-radius:50%;background:rgba(59,126,255,.15);border:1px solid rgba(59,126,255,.3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">📋</div><div style="flex:1;width:1px;background:var(--border);margin-top:3px"></div></div>
+              <div><div style="font-size:10px;font-weight:600;margin-bottom:1px">Proposal Accepted</div><div style="font-size:9px;color:var(--muted)">Mar 10, 2025 · Legal review completed</div></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <div style="display:flex;flex-direction:column;align-items:center"><div style="width:22px;height:22px;border-radius:50%;background:rgba(255,181,71,.12);border:1px solid rgba(255,181,71,.3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">📞</div><div style="flex:1;width:1px;background:var(--border);margin-top:3px"></div></div>
+              <div><div style="font-size:10px;font-weight:600;margin-bottom:1px">Demo Call — 45 min</div><div style="font-size:9px;color:var(--muted)">Mar 4, 2025 · Strong interest, pricing discussed</div></div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:22px;height:22px;border-radius:50%;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">📧</div>
+              <div><div style="font-size:10px;font-weight:600;margin-bottom:1px">First Contact</div><div style="font-size:9px;color:var(--muted)">Feb 22, 2025 · Inbound inquiry via website</div></div>
+            </div>
+          </div>
+          <!-- Quick note -->
+          <div style="margin-top:10px;padding:7px 10px;background:rgba(255,181,71,.06);border:1px solid rgba(255,181,71,.2);border-radius:7px;font-size:9px;color:var(--muted2)">
+            📝 <span style="color:var(--yellow);font-weight:600">Note:</span> Aryan prefers Slack for comms. Follow up on Q2 expansion by Apr 5.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 5 · HRM — TEAM & PAYROLL
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s5">
+    <div class="chip chip-teal" id="s5c"><span class="pulsedot" style="background:var(--teal)"></span>HR Management</div>
+    <div class="h2" id="s5h">Your people, <span class="hlteal">perfectly managed</span></div>
+    <div class="sub" id="s5s">Onboarding, attendance, leave management, payroll processing, and performance reviews — all automated.</div>
+
+    <div class="card panel" id="s5p" style="height:260px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Human Resources</span>
+        <div style="margin-left:auto;font-size:9px;color:var(--muted)">38 Employees · 5 Departments</div>
+      </div>
+      <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+        <!-- Employee list -->
+        <div style="flex:1.2;display:flex;flex-direction:column;gap:0;overflow:hidden">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Team Members</div>
+          <div class="row" style="font-size:9px"><div class="av" style="width:26px;height:26px;background:linear-gradient(135deg,#3B7EFF,#6B9FFF)"></div><div style="flex:1"><div style="font-weight:600">Rahim Uddin</div><div style="color:var(--muted);font-size:8px">Lead Developer · Engineering</div></div><div class="tag tg">On-duty</div><div style="margin-left:6px;font-size:8px;color:var(--muted)">Joined Jan '23</div></div>
+          <div class="row" style="font-size:9px"><div class="av" style="width:26px;height:26px;background:linear-gradient(135deg,#FF5F5F,#FF9494)"></div><div style="flex:1"><div style="font-weight:600">Nadia Islam</div><div style="color:var(--muted);font-size:8px">Product Manager · Operations</div></div><div class="tag tg">On-duty</div><div style="margin-left:6px;font-size:8px;color:var(--muted)">Joined Mar '22</div></div>
+          <div class="row" style="font-size:9px"><div class="av" style="width:26px;height:26px;background:linear-gradient(135deg,#FFB547,#FFD180)"></div><div style="flex:1"><div style="font-weight:600">Sabbir Ahmed</div><div style="color:var(--muted);font-size:8px">Sales Executive · Revenue</div></div><div class="tag ty">On Leave</div><div style="margin-left:6px;font-size:8px;color:var(--muted)">Joined Aug '23</div></div>
+          <div class="row" style="font-size:9px"><div class="av" style="width:26px;height:26px;background:linear-gradient(135deg,#00D4AA,#00FFCC)"></div><div style="flex:1"><div style="font-weight:600">Tasnim Khatun</div><div style="color:var(--muted);font-size:8px">UI/UX Designer · Design</div></div><div class="tag tg">On-duty</div><div style="margin-left:6px;font-size:8px;color:var(--muted)">Joined Nov '23</div></div>
+          <div class="row" style="font-size:9px;border-bottom:none"><div class="av" style="width:26px;height:26px;background:linear-gradient(135deg,#A78BFA,#C4B5FD)"></div><div style="flex:1"><div style="font-weight:600">Imran Hossain</div><div style="color:var(--muted);font-size:8px">Finance Manager · Accounts</div></div><div class="tag tg">On-duty</div><div style="margin-left:6px;font-size:8px;color:var(--muted)">Joined Apr '22</div></div>
+        </div>
+        <!-- Performance -->
+        <div style="width:160px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Performance</div>
+          <div>
+            <div style="font-size:9px;display:flex;justify-content:space-between;margin-bottom:3px">Rahim<span style="color:var(--teal);font-weight:600">94%</span></div>
+            <div class="pbar"><div class="pfill" style="width:0%;background:var(--teal)" id="s5p1" data-w="94%"></div></div>
+          </div>
+          <div>
+            <div style="font-size:9px;display:flex;justify-content:space-between;margin-bottom:3px">Nadia<span style="color:var(--blue);font-weight:600">88%</span></div>
+            <div class="pbar"><div class="pfill" style="width:0%;background:var(--blue)" id="s5p2" data-w="88%"></div></div>
+          </div>
+          <div>
+            <div style="font-size:9px;display:flex;justify-content:space-between;margin-bottom:3px">Tasnim<span style="color:var(--yellow);font-weight:600">76%</span></div>
+            <div class="pbar"><div class="pfill" style="width:0%;background:var(--yellow)" id="s5p3" data-w="76%"></div></div>
+          </div>
+          <div>
+            <div style="font-size:9px;display:flex;justify-content:space-between;margin-bottom:3px">Imran<span style="color:var(--purple);font-weight:600">82%</span></div>
+            <div class="pbar"><div class="pfill" style="width:0%;background:var(--purple)" id="s5p4" data-w="82%"></div></div>
+          </div>
+        </div>
+        <!-- Payroll + Attendance -->
+        <div style="width:160px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <div class="card2" style="padding:10px">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Payroll — Mar</div>
+            <div style="font-family:var(--fh);font-size:20px;font-weight:700;color:var(--teal)">$68,400</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:2px">38 employees processed</div>
+            <div style="margin-top:6px;padding:4px 8px;background:rgba(0,212,170,.1);border-radius:5px;font-size:8px;color:var(--teal);display:inline-block">✅ Disbursed on time</div>
+          </div>
+          <div class="card2" style="padding:10px;text-align:center">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Attendance Today</div>
+            <svg width="68" height="68" viewBox="0 0 68 68">
+              <circle cx="34" cy="34" r="26" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="7"/>
+              <circle cx="34" cy="34" r="26" fill="none" stroke="var(--teal)" stroke-width="7" stroke-dasharray="163" stroke-dashoffset="33" stroke-linecap="round" transform="rotate(-90 34 34)"/>
+              <text x="34" y="37" text-anchor="middle" fill="var(--text)" font-family="Syne" font-size="11" font-weight="700">80%</text>
+            </svg>
+            <div style="font-size:8px;color:var(--muted);margin-top:2px">30/38 present</div>
+            <div style="display:flex;gap:4px;justify-content:center;margin-top:5px"><div class="tag tg" style="font-size:7px">30 In</div><div class="tag ty" style="font-size:7px">5 Leave</div><div class="tag tr" style="font-size:7px">3 Out</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif" id="s5n"><div class="ni">💰</div><div><div class="nt">Payroll processed!</div><div class="ns">$68,400 disbursed to 38 employees</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 6 · ACCOUNTING & INVOICING
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s6">
+    <div class="chip chip-yellow" id="s6c"><span class="pulsedot" style="background:var(--yellow)"></span>Accounting</div>
+    <div class="h2" id="s6h">Full financial <span class="hlyellow">clarity & control</span></div>
+    <div class="sub" id="s6s">Create invoices in seconds, track expenses, reconcile payments, and generate financial reports automatically.</div>
+
+    <div class="card panel" id="s6p" style="height:260px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Accounting & Finance</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div style="padding:3px 10px;background:var(--yellow);border-radius:5px;font-size:9px;font-weight:600;color:#000">+ New Invoice</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+        <!-- Invoice list -->
+        <div style="flex:1.4;overflow:hidden">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Recent Invoices</div>
+          <div class="inv-line"><span style="color:var(--muted);width:56px;flex-shrink:0">INV-1042</span><span style="flex:1">TechVentures Ltd.</span><span style="color:var(--teal);font-weight:600;width:52px">$12,400</span><div class="tag tg">Paid</div></div>
+          <div class="inv-line"><span style="color:var(--muted);width:56px;flex-shrink:0">INV-1041</span><span style="flex:1">Nova Solutions</span><span style="font-weight:600;width:52px">$8,100</span><div class="tag ty">Pending</div></div>
+          <div class="inv-line"><span style="color:var(--muted);width:56px;flex-shrink:0">INV-1040</span><span style="flex:1">Spark Digital</span><span style="color:var(--teal);font-weight:600;width:52px">$6,700</span><div class="tag tg">Paid</div></div>
+          <div class="inv-line"><span style="color:var(--muted);width:56px;flex-shrink:0">INV-1039</span><span style="flex:1">GlobalMart Corp.</span><span style="font-weight:600;width:52px">$3,200</span><div class="tag tr">Overdue</div></div>
+          <div class="inv-line" style="border:none"><span style="color:var(--muted);width:56px;flex-shrink:0">INV-1038</span><span style="flex:1">Meridian Group</span><span style="color:var(--teal);font-weight:600;width:52px">$19,500</span><div class="tag tg">Paid</div></div>
+          <div style="margin-top:8px;padding:8px 10px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:7px;display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:8px;color:var(--muted)">Total Collected — March</div><div style="font-family:var(--fh);font-size:18px;font-weight:700;color:var(--teal)">$84,200</div></div>
+            <div><div style="font-size:8px;color:var(--muted)">Outstanding</div><div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--yellow)">$11,300</div></div>
+          </div>
+        </div>
+        <!-- Revenue chart -->
+        <div style="flex:.9;display:flex;flex-direction:column;gap:8px">
+          <div class="card2" style="flex:1;padding:10px">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px">Revenue Breakdown</div>
+            <svg width="100%" height="90" viewBox="0 0 120 90">
+              <circle cx="50" cy="50" r="36" fill="none" stroke="var(--blue)" stroke-width="12" stroke-dasharray="226" stroke-dashoffset="0" transform="rotate(-90 50 50)" opacity=".9"/>
+              <circle cx="50" cy="50" r="36" fill="none" stroke="var(--teal)" stroke-width="12" stroke-dasharray="226" stroke-dashoffset="161" transform="rotate(-90 50 50)" opacity=".9"/>
+              <circle cx="50" cy="50" r="36" fill="none" stroke="var(--yellow)" stroke-width="12" stroke-dasharray="226" stroke-dashoffset="205" transform="rotate(-90 50 50)" opacity=".9"/>
+              <text x="50" y="53" text-anchor="middle" fill="var(--text)" font-family="Syne" font-size="11" font-weight="700">$84K</text>
+            </svg>
+            <div style="font-size:8px;display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;gap:5px;align-items:center"><div style="width:7px;height:7px;border-radius:2px;background:var(--blue)"></div>Services <span style="margin-left:auto;font-weight:600">52%</span></div>
+              <div style="display:flex;gap:5px;align-items:center"><div style="width:7px;height:7px;border-radius:2px;background:var(--teal)"></div>Products <span style="margin-left:auto;font-weight:600">29%</span></div>
+              <div style="display:flex;gap:5px;align-items:center"><div style="width:7px;height:7px;border-radius:2px;background:var(--yellow)"></div>Retainer <span style="margin-left:auto;font-weight:600">19%</span></div>
+            </div>
+          </div>
+          <div class="card2" style="padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div style="padding:6px;background:rgba(59,126,255,.08);border-radius:5px;font-size:8px;cursor:pointer;text-align:center">📝 Invoice</div>
+            <div style="padding:6px;background:rgba(0,212,170,.07);border-radius:5px;font-size:8px;cursor:pointer;text-align:center">💳 Payment</div>
+            <div style="padding:6px;background:rgba(255,181,71,.07);border-radius:5px;font-size:8px;cursor:pointer;text-align:center">📊 Report</div>
+            <div style="padding:6px;background:var(--surf3);border-radius:5px;font-size:8px;cursor:pointer;text-align:center">🔄 Recurring</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif" id="s6n"><div class="ni">💳</div><div><div class="nt">Payment received!</div><div class="ns">INV-1042 · $12,400 from TechVentures</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 7 · PROJECT MANAGEMENT
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s7">
+    <div class="chip chip-red" id="s7c"><span class="pulsedot" style="background:var(--red)"></span>Project Management</div>
+    <div class="h2" id="s7h">Deliver on time, <span class="hlred">every time</span></div>
+    <div class="sub" id="s7s">Tasks, sprints, Gantt timelines, and team workloads — structured and visual so nothing falls through the cracks.</div>
+
+    <div class="card panel" id="s7p" style="height:260px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Website Redesign · Sprint 3</span>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div style="display:flex"><div class="av" style="width:18px;height:18px;background:linear-gradient(135deg,#3B7EFF,#6B9FFF);margin-right:-5px;border:2px solid var(--surf)"></div><div class="av" style="width:18px;height:18px;background:linear-gradient(135deg,#00D4AA,#00FFCC);margin-right:-5px;border:2px solid var(--surf)"></div><div class="av" style="width:18px;height:18px;background:linear-gradient(135deg,#A78BFA,#C4B5FD);border:2px solid var(--surf)"></div></div>
+          <div style="font-size:9px;color:var(--muted)">3 members</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+        <!-- Tasks -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:0">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Tasks</div>
+          <div class="row" style="font-size:9px"><div style="width:14px;height:14px;border-radius:4px;background:rgba(0,212,170,.2);border:1px solid rgba(0,212,170,.4);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--teal);flex-shrink:0">✓</div><div style="flex:1;text-decoration:line-through;color:var(--muted)">Define scope & requirements</div><div class="tag tg" style="font-size:7px">Done</div></div>
+          <div class="row" style="font-size:9px"><div style="width:14px;height:14px;border-radius:4px;background:rgba(0,212,170,.2);border:1px solid rgba(0,212,170,.4);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--teal);flex-shrink:0">✓</div><div style="flex:1;text-decoration:line-through;color:var(--muted)">Wireframes & design system</div><div class="tag tg" style="font-size:7px">Done</div></div>
+          <div class="row" style="font-size:9px"><div style="width:14px;height:14px;border-radius:4px;background:rgba(0,212,170,.2);border:1px solid rgba(0,212,170,.4);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--teal);flex-shrink:0">✓</div><div style="flex:1;text-decoration:line-through;color:var(--muted)">Homepage & component library</div><div class="tag tg" style="font-size:7px">Done</div></div>
+          <div class="row" style="font-size:9px;background:rgba(59,126,255,.05);border-radius:5px;padding:5px;border-color:rgba(59,126,255,.2)"><div style="width:14px;height:14px;border-radius:4px;background:rgba(59,126,255,.15);border:1px solid rgba(59,126,255,.4);flex-shrink:0"></div><div style="flex:1;font-weight:600">Backend API integration</div><div class="tag tb" style="font-size:7px">In Progress</div></div>
+          <div class="row" style="font-size:9px"><div style="width:14px;height:14px;border-radius:4px;background:var(--surf2);border:1px solid var(--border);flex-shrink:0"></div><div style="flex:1;color:var(--muted2)">QA testing & bug fixes</div><div class="tag ty" style="font-size:7px">Upcoming</div></div>
+          <div class="row" style="font-size:9px;border:none"><div style="width:14px;height:14px;border-radius:4px;background:var(--surf2);border:1px solid var(--border);flex-shrink:0"></div><div style="flex:1;color:var(--muted2)">Launch & go-live</div><div style="font-size:7px;color:var(--muted)">Mar 28</div></div>
+
+          <div style="margin-top:8px">
+            <div style="font-size:8px;display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--muted)">Sprint Progress</span><span style="color:var(--blue);font-weight:600">62%</span></div>
+            <div class="pbar" style="height:6px"><div class="pfill" style="width:0%;background:linear-gradient(90deg,var(--blue),var(--teal))" id="s7pg" data-w="62%"></div></div>
+          </div>
+        </div>
+
+        <!-- Gantt -->
+        <div style="flex:1.2;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px">Gantt Timeline — March 2025</div>
+          <div style="font-size:8px;display:flex;gap:2px;color:var(--muted);margin-bottom:4px">
+            <span style="width:100px;flex-shrink:0"></span>
+            <span style="flex:1;text-align:center">W1</span><span style="flex:1;text-align:center">W2</span><span style="flex:1;text-align:center">W3</span><span style="flex:1;text-align:center">W4</span>
+          </div>
+          <div style="font-size:9px;display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="width:100px;flex-shrink:0;color:var(--muted2);font-size:8px">Design Phase</span>
+            <div style="flex:1;height:9px;position:relative"><div style="position:absolute;left:0%;width:50%;height:100%;background:var(--teal);border-radius:3px;opacity:.85"></div></div>
+          </div>
+          <div style="font-size:9px;display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="width:100px;flex-shrink:0;color:var(--muted2);font-size:8px">Development</span>
+            <div style="flex:1;height:9px;position:relative"><div style="position:absolute;left:25%;width:55%;height:100%;background:var(--blue);border-radius:3px;opacity:.85"></div></div>
+          </div>
+          <div style="font-size:9px;display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="width:100px;flex-shrink:0;color:var(--muted2);font-size:8px">API Integration</span>
+            <div style="flex:1;height:9px;position:relative"><div style="position:absolute;left:50%;width:35%;height:100%;background:var(--purple);border-radius:3px;opacity:.85;animation:glow 2s ease-in-out infinite"></div></div>
+          </div>
+          <div style="font-size:9px;display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="width:100px;flex-shrink:0;color:var(--muted2);font-size:8px">QA Testing</span>
+            <div style="flex:1;height:9px;position:relative"><div style="position:absolute;left:68%;width:22%;height:100%;background:var(--yellow);border-radius:3px;opacity:.7"></div></div>
+          </div>
+          <div style="font-size:9px;display:flex;align-items:center;gap:6px">
+            <span style="width:100px;flex-shrink:0;color:var(--muted2);font-size:8px">Launch</span>
+            <div style="flex:1;height:9px;position:relative"><div style="position:absolute;left:88%;width:8%;height:100%;background:var(--red);border-radius:3px;opacity:.9"></div></div>
+          </div>
+
+          <div style="margin-top:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px">
+            <div class="card2" style="padding:7px;text-align:center"><div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--blue)">6</div><div style="font-size:7px;color:var(--muted)">Projects</div></div>
+            <div class="card2" style="padding:7px;text-align:center"><div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--teal)">47</div><div style="font-size:7px;color:var(--muted)">Done</div></div>
+            <div class="card2" style="padding:7px;text-align:center"><div style="font-family:var(--fh);font-size:16px;font-weight:700;color:var(--yellow)">3</div><div style="font-size:7px;color:var(--muted)">Overdue</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 8 · DOCUMENTS
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s8">
+    <div class="chip chip-purple" id="s8c"><span class="pulsedot" style="background:var(--purple)"></span>Documents</div>
+    <div class="h2" id="s8h">All your files, <span class="hlpurple">always organized</span></div>
+    <div class="sub" id="s8s">Secure file management with version control, smart search, team sharing, and e-signature support built in.</div>
+
+    <div class="card panel" id="s8p" style="height:255px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Document Manager</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div style="padding:3px 14px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);border-radius:5px;font-size:9px;color:var(--purple);font-weight:600">+ Upload</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+        <!-- Left: folder tree -->
+        <div style="width:160px;flex-shrink:0;border-right:1px solid var(--border);padding-right:12px">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Folders</div>
+          <div style="font-size:10px;display:flex;flex-direction:column;gap:2px">
+            <div style="padding:5px 8px;background:rgba(167,139,250,.1);border-radius:5px;color:var(--purple);font-weight:600;display:flex;align-items:center;gap:5px">📁 Contracts <span style="margin-left:auto;font-size:8px;color:var(--muted)">14</span></div>
+            <div style="padding:5px 8px;border-radius:5px;color:var(--muted2);display:flex;align-items:center;gap:5px">📂 Proposals <span style="margin-left:auto;font-size:8px;color:var(--muted)">8</span></div>
+            <div style="padding:5px 8px;border-radius:5px;color:var(--muted2);display:flex;align-items:center;gap:5px">📂 HR Documents <span style="margin-left:auto;font-size:8px;color:var(--muted)">23</span></div>
+            <div style="padding:5px 8px;border-radius:5px;color:var(--muted2);display:flex;align-items:center;gap:5px">📂 Invoices <span style="margin-left:auto;font-size:8px;color:var(--muted)">42</span></div>
+            <div style="padding:5px 8px;border-radius:5px;color:var(--muted2);display:flex;align-items:center;gap:5px">📂 Design Assets <span style="margin-left:auto;font-size:8px;color:var(--muted)">31</span></div>
+          </div>
+          <div style="margin-top:12px;padding:8px;background:var(--surf3);border-radius:7px">
+            <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Storage Used</div>
+            <div class="pbar" style="height:4px"><div class="pfill" style="width:0%;background:var(--purple)" id="s8pg" data-w="68%"></div></div>
+            <div style="font-size:8px;color:var(--muted2);margin-top:3px">34 GB / 50 GB</div>
+          </div>
+        </div>
+        <!-- Right: file list -->
+        <div style="flex:1;overflow:hidden">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">📁 Contracts — Recent</div>
+          <div class="doc-row"><div class="doc-icon" style="background:rgba(59,126,255,.12);color:var(--blue)">📄</div><div class="doc-name">NovaTech_Contract_2025.pdf</div><div class="tag tg" style="font-size:7px">Signed</div><div class="doc-size">2.4 MB</div><div style="font-size:8px;color:var(--muted);margin-left:4px">Mar 14</div></div>
+          <div class="doc-row"><div class="doc-icon" style="background:rgba(0,212,170,.1);color:var(--teal)">📝</div><div class="doc-name">TechVentures_MSA_v3.docx</div><div class="tag tp" style="font-size:7px">Draft</div><div class="doc-size">840 KB</div><div style="font-size:8px;color:var(--muted);margin-left:4px">Mar 10</div></div>
+          <div class="doc-row"><div class="doc-icon" style="background:rgba(255,181,71,.1);color:var(--yellow)">📊</div><div class="doc-name">Q1_Financial_Report.xlsx</div><div class="tag tg" style="font-size:7px">Final</div><div class="doc-size">1.1 MB</div><div style="font-size:8px;color:var(--muted);margin-left:4px">Mar 5</div></div>
+          <div class="doc-row"><div class="doc-icon" style="background:rgba(167,139,250,.1);color:var(--purple)">🖼️</div><div class="doc-name">Dynime_Brand_Assets.zip</div><div class="tag tb" style="font-size:7px">Shared</div><div class="doc-size">18.2 MB</div><div style="font-size:8px;color:var(--muted);margin-left:4px">Feb 28</div></div>
+          <div class="doc-row" style="border:none"><div class="doc-icon" style="background:rgba(255,95,95,.1);color:var(--red)">📋</div><div class="doc-name">Spark_Digital_Proposal.pdf</div><div class="tag ty" style="font-size:7px">Pending</div><div class="doc-size">3.8 MB</div><div style="font-size:8px;color:var(--muted);margin-left:4px">Feb 20</div></div>
+
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <div style="padding:6px 12px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);border-radius:6px;font-size:9px;color:var(--purple);cursor:pointer">✍️ E-Sign</div>
+            <div style="padding:6px 12px;background:rgba(59,126,255,.1);border:1px solid rgba(59,126,255,.25);border-radius:6px;font-size:9px;color:var(--blue);cursor:pointer">🔗 Share Link</div>
+            <div style="padding:6px 12px;background:var(--surf2);border:1px solid var(--border);border-radius:6px;font-size:9px;color:var(--muted2);cursor:pointer">📋 Version History</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 9 · WORKFLOW AUTOMATION
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s9">
+    <div class="chip chip-teal" id="s9c"><span class="pulsedot" style="background:var(--teal)"></span>Workflow Automation</div>
+    <div class="h2" id="s9h">Let <span class="hlteal">automation</span> do the heavy lifting</div>
+    <div class="sub" id="s9s">Build powerful no-code automation workflows. Trigger actions across modules — invoices, emails, tasks, and alerts — automatically.</div>
+
+    <div class="card panel" id="s9p" style="height:255px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Workflow Builder</span>
+        <div style="margin-left:auto;display:flex;gap:6px;align-items:center;font-size:9px;color:var(--muted)"><span class="tag tg" style="font-size:8px">● Live</span> 3 active workflows</div>
+      </div>
+      <div style="flex:1;display:flex;padding:14px 20px;gap:16px;overflow:hidden;align-items:center">
+        <!-- Flow diagram -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px">🔄 Automation: New Deal → Onboarding</div>
+          <div class="flow-row">
+            <div class="flow-node flow-active" style="background:rgba(59,126,255,.1);border-color:var(--blue)"><div style="font-size:14px;margin-bottom:3px">⚡</div><div style="font-size:8px;font-weight:600;color:var(--blue)">TRIGGER</div><div style="font-size:7px;color:var(--muted2)">Deal marked Won</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-teal"><div style="font-size:14px;margin-bottom:3px">📧</div><div style="font-size:8px;font-weight:600;color:var(--teal)">ACTION 1</div><div style="font-size:7px;color:var(--muted2)">Send welcome email</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-yellow"><div style="font-size:14px;margin-bottom:3px">📋</div><div style="font-size:8px;font-weight:600;color:var(--yellow)">ACTION 2</div><div style="font-size:7px;color:var(--muted2)">Create onboard tasks</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-teal"><div style="font-size:14px;margin-bottom:3px">🔔</div><div style="font-size:8px;font-weight:600;color:var(--teal)">ACTION 3</div><div style="font-size:7px;color:var(--muted2)">Notify sales team</div></div>
+          </div>
+          <div class="flow-row">
+            <div class="flow-node" style="opacity:.6"><div style="font-size:14px;margin-bottom:3px">⚡</div><div style="font-size:8px;font-weight:600">TRIGGER</div><div style="font-size:7px;color:var(--muted)">Invoice overdue 7d</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-yellow" style="opacity:.7"><div style="font-size:14px;margin-bottom:3px">📧</div><div style="font-size:8px;font-weight:600;color:var(--yellow)">ACTION</div><div style="font-size:7px;color:var(--muted2)">Send reminder</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="opacity:.5;border-style:dashed"><div style="font-size:14px;margin-bottom:3px">+</div><div style="font-size:8px;color:var(--muted)">Add step...</div></div>
+          </div>
+        </div>
+        <!-- Stats sidebar -->
+        <div style="width:160px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <div class="card2" style="padding:10px">
+            <div style="font-size:8px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em">This Month</div>
+            <div style="margin-bottom:8px"><div style="font-family:var(--fh);font-size:22px;font-weight:700;color:var(--teal)">1,284</div><div style="font-size:8px;color:var(--muted)">Automations run</div></div>
+            <div style="margin-bottom:8px"><div style="font-family:var(--fh);font-size:22px;font-weight:700;color:var(--blue)">98.7%</div><div style="font-size:8px;color:var(--muted)">Success rate</div></div>
+            <div><div style="font-family:var(--fh);font-size:22px;font-weight:700;color:var(--yellow)">42h</div><div style="font-size:8px;color:var(--muted)">Time saved</div></div>
+          </div>
+          <div style="padding:8px 10px;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:7px;font-size:9px;color:var(--teal)">
+            ⚡ 3 workflows active<br><span style="color:var(--muted);font-size:8px">Running 24/7 automatically</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif" id="s9n"><div class="ni">⚡</div><div><div class="nt">Automation triggered</div><div class="ns">Welcome email sent to Aryan Mehta</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 10 · ANALYTICS & REPORTS
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s10">
+    <div class="chip chip-purple" id="s10c"><span class="pulsedot" style="background:var(--purple)"></span>Analytics</div>
+    <div class="h2" id="s10h">Data-driven <span class="hlpurple">decisions</span>, made easy</div>
+    <div class="sub" id="s10s">Advanced analytics across every module. Revenue forecasts, team performance, client retention — all in real-time charts.</div>
+
+    <div class="card panel" id="s10p" style="height:260px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Business Analytics</span>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <div style="padding:3px 10px;background:var(--surf2);border:1px solid var(--border);border-radius:5px;font-size:9px;color:var(--muted)">Last 12 months ▾</div>
+          <div style="padding:3px 10px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:5px;font-size:9px;color:var(--purple)">Export PDF</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+        <!-- Main chart -->
+        <div style="flex:1.8;display:flex;flex-direction:column;gap:8px">
+          <div class="card2" style="flex:1;padding:10px;position:relative;overflow:hidden">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between"><span>Revenue vs Expenses — 2025</span><span style="color:var(--purple)">Forecast enabled</span></div>
+            <svg width="100%" height="80" viewBox="0 0 400 80" preserveAspectRatio="none">
+              <!-- Expense line -->
+              <polyline fill="none" stroke="rgba(255,95,95,.5)" stroke-width="1.5" stroke-dasharray="2,3"
+                points="0,65 36,60 72,58 108,55 144,54 180,52 216,50 252,48 288,46 324,45 360,44 400,42"/>
+              <!-- Revenue area -->
+              <defs>
+                <linearGradient id="revgrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(167,139,250,.3)"/>
+                  <stop offset="100%" stop-color="rgba(167,139,250,.02)"/>
+                </linearGradient>
+              </defs>
+              <polygon fill="url(#revgrad)"
+                points="0,80 0,58 36,52 72,46 108,42 144,38 180,34 216,30 252,28 288,22 324,18 360,12 400,8 400,80"/>
+              <polyline fill="none" stroke="var(--purple)" stroke-width="2"
+                points="0,58 36,52 72,46 108,42 144,38 180,34 216,30 252,28 288,22 324,18 360,12 400,8"/>
+              <!-- Dots -->
+              <circle cx="324" cy="18" r="3" fill="var(--purple)"/>
+              <circle cx="400" cy="8" r="3" fill="var(--teal)" stroke="var(--teal)" stroke-width="1"/>
+            </svg>
+            <div style="display:flex;gap:12px;font-size:8px">
+              <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:2px;background:var(--purple)"></div>Revenue</div>
+              <div style="display:flex;align-items:center;gap:4px"><div style="width:12px;height:2px;background:var(--red);opacity:.6;border-top:2px dashed var(--red)"></div>Expenses</div>
+              <div style="display:flex;align-items:center;gap:4px"><div style="width:6px;height:6px;border-radius:50%;background:var(--teal)"></div>Forecast</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div class="card2" style="padding:8px"><div style="font-size:7px;color:var(--muted);margin-bottom:3px">Net Revenue</div><div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--teal)">$84.2K</div><div style="font-size:7px;color:var(--teal)">↑ 18%</div></div>
+            <div class="card2" style="padding:8px"><div style="font-size:7px;color:var(--muted);margin-bottom:3px">Gross Margin</div><div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--purple)">64.3%</div><div style="font-size:7px;color:var(--purple)">↑ 3.1%</div></div>
+            <div class="card2" style="padding:8px"><div style="font-size:7px;color:var(--muted);margin-bottom:3px">Churn Rate</div><div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--yellow)">2.1%</div><div style="font-size:7px;color:var(--teal)">↓ 0.8%</div></div>
+            <div class="card2" style="padding:8px"><div style="font-size:7px;color:var(--muted);margin-bottom:3px">NPS Score</div><div style="font-family:var(--fh);font-size:14px;font-weight:700;color:var(--blue)">74</div><div style="font-size:7px;color:var(--blue)">↑ 6 pts</div></div>
+          </div>
+        </div>
+        <!-- Side charts -->
+        <div style="width:160px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <div class="card2" style="padding:10px;flex:1">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Top Channels</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div><div style="font-size:8px;display:flex;justify-content:space-between;margin-bottom:2px">Inbound<span style="color:var(--purple)">48%</span></div><div class="pbar"><div class="pfill" style="width:0%;background:var(--purple)" id="s10c1" data-w="48%"></div></div></div>
+              <div><div style="font-size:8px;display:flex;justify-content:space-between;margin-bottom:2px">Referral<span style="color:var(--blue)">31%</span></div><div class="pbar"><div class="pfill" style="width:0%;background:var(--blue)" id="s10c2" data-w="31%"></div></div></div>
+              <div><div style="font-size:8px;display:flex;justify-content:space-between;margin-bottom:2px">Outbound<span style="color:var(--teal)">21%</span></div><div class="pbar"><div class="pfill" style="width:0%;background:var(--teal)" id="s10c3" data-w="21%"></div></div></div>
+            </div>
+          </div>
+          <div class="card2" style="padding:10px">
+            <div style="font-size:8px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.1em">Forecast Q2</div>
+            <div style="font-family:var(--fh);font-size:20px;font-weight:700;color:var(--purple)">$112K</div>
+            <div style="font-size:8px;color:var(--muted);margin-top:2px">Projected revenue</div>
+            <div style="margin-top:5px;font-size:8px;color:var(--teal)">↑ +33% QoQ growth</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 11 · PAYMENTS
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s11">
+    <div class="chip chip-teal" id="s11c"><span class="pulsedot" style="background:var(--teal)"></span>Payments</div>
+    <div class="h2" id="s11h">Get paid <span class="hlteal">faster</span>, every time</div>
+    <div class="sub" id="s11s">Integrated payment processing with multiple gateways. Accept cards, bank transfers, and mobile payments globally.</div>
+
+    <div class="card panel" id="s11p" style="height:255px;display:flex;flex-direction:column">
+      <div class="topbar">
+        <div class="tb-dot" style="background:#FF5F5F"></div><div class="tb-dot" style="background:#FFB547"></div><div class="tb-dot" style="background:#00D4AA"></div>
+        <span style="font-size:10px;color:var(--muted2);margin-left:10px;font-weight:600">Payment Processing</span>
+        <div style="margin-left:auto;display:flex;gap:5px;align-items:center">
+          <div style="padding:2px 8px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);border-radius:4px;font-size:8px;color:var(--teal)">🔒 PCI DSS Compliant</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;padding:12px;gap:12px;overflow:hidden">
+        <!-- Payment summary -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="card2" style="padding:10px;border-color:rgba(0,212,170,.2)">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Collected Today</div>
+              <div style="font-family:var(--fh);font-size:20px;font-weight:700;color:var(--teal)">$18,200</div>
+              <div style="font-size:8px;color:var(--teal);margin-top:2px">↑ 12% vs yesterday</div>
+            </div>
+            <div class="card2" style="padding:10px">
+              <div style="font-size:8px;color:var(--muted);margin-bottom:4px">Pending Payouts</div>
+              <div style="font-family:var(--fh);font-size:20px;font-weight:700;color:var(--yellow)">$11,300</div>
+              <div style="font-size:8px;color:var(--muted);margin-top:2px">3 invoices pending</div>
+            </div>
+          </div>
+          <div class="card2" style="padding:10px;flex:1">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Recent Transactions</div>
+            <div class="row" style="font-size:9px"><div style="width:22px;height:22px;border-radius:5px;background:rgba(0,212,170,.12);display:flex;align-items:center;justify-content:center;font-size:10px">💳</div><div style="flex:1"><div style="font-weight:600;font-size:9px">TechVentures Ltd.</div><div style="font-size:8px;color:var(--muted)">Card · ····4242</div></div><div style="color:var(--teal);font-weight:600;font-size:10px">+$12,400</div></div>
+            <div class="row" style="font-size:9px"><div style="width:22px;height:22px;border-radius:5px;background:rgba(59,126,255,.12);display:flex;align-items:center;justify-content:center;font-size:10px">🏦</div><div style="flex:1"><div style="font-weight:600;font-size:9px">Spark Digital</div><div style="font-size:8px;color:var(--muted)">Bank Transfer</div></div><div style="color:var(--teal);font-weight:600;font-size:10px">+$6,700</div></div>
+            <div class="row" style="font-size:9px;border:none"><div style="width:22px;height:22px;border-radius:5px;background:rgba(255,181,71,.1);display:flex;align-items:center;justify-content:center;font-size:10px">📱</div><div style="flex:1"><div style="font-weight:600;font-size:9px">Meridian Group</div><div style="font-size:8px;color:var(--muted)">Mobile Pay</div></div><div style="color:var(--teal);font-weight:600;font-size:10px">+$19,500</div></div>
+          </div>
+        </div>
+        <!-- Gateway logos / config -->
+        <div style="width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:8px">
+          <div class="card2" style="padding:10px">
+            <div style="font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Payment Gateways</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:6px"><span style="font-size:12px">💳</span><span style="font-size:9px;flex:1">Stripe</span><div class="tag tg" style="font-size:7px">Connected</div></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(59,126,255,.06);border:1px solid rgba(59,126,255,.15);border-radius:6px"><span style="font-size:12px">🅿️</span><span style="font-size:9px;flex:1">PayPal</span><div class="tag tb" style="font-size:7px">Connected</div></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surf3);border:1px solid var(--border);border-radius:6px"><span style="font-size:12px">🏦</span><span style="font-size:9px;flex:1">SSLCOMMERZ</span><div class="tag tg" style="font-size:7px">Connected</div></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--surf3);border:1px solid var(--border);border-radius:6px"><span style="font-size:12px">📱</span><span style="font-size:9px;flex:1">bKash / Nagad</span><div class="tag tg" style="font-size:7px">Active</div></div>
+            </div>
+          </div>
+          <div style="padding:8px 10px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:7px;font-size:9px;text-align:center;color:var(--teal)">🔒 All transactions encrypted<br><span style="font-size:8px;color:var(--muted)">256-bit SSL · PCI Level 1</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notif" id="s11n"><div class="ni">✅</div><div><div class="nt">Payment confirmed!</div><div class="ns">$12,400 settled from TechVentures</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 12 · MODULE OVERVIEW
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s12">
+    <div class="chip chip-blue" id="s12c"><span class="pulsedot" style="background:var(--blue)"></span>Complete Platform</div>
+    <div class="h2" id="s12h">8 modules. <span class="hlblue">Zero compromises.</span></div>
+    <div class="sub" id="s12s">Everything your business needs — tightly integrated so data flows seamlessly across every module.</div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:24px;width:700px;opacity:0;transform:translateY(16px);transition:all .7s ease .5s" id="s12g">
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(59,126,255,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">👥</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">CRM</div><div style="font-size:9px;color:var(--muted)">Pipeline & contacts</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(0,212,170,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">🧑‍💼</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">HRM</div><div style="font-size:9px;color:var(--muted)">People & payroll</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(255,181,71,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">💰</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">Accounting</div><div style="font-size:9px;color:var(--muted)">Finance & invoices</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(255,95,95,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">📋</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">Projects</div><div style="font-size:9px;color:var(--muted)">Tasks & timelines</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(167,139,250,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">📁</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">Documents</div><div style="font-size:9px;color:var(--muted)">Files & e-sign</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(0,212,170,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">⚡</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">Automation</div><div style="font-size:9px;color:var(--muted)">Workflows & triggers</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(167,139,250,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">📊</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">Analytics</div><div style="font-size:9px;color:var(--muted)">Reports & insights</div></div>
+      <div class="card2" style="padding:14px;text-align:center;transition:transform .3s,border-color .3s;cursor:pointer" onmouseenter="this.style.borderColor='rgba(0,212,170,.4)'" onmouseleave="this.style.borderColor=''"><div style="font-size:26px;margin-bottom:6px">💳</div><div style="font-family:var(--fh);font-size:12px;font-weight:700;margin-bottom:3px">Payments</div><div style="font-size:9px;color:var(--muted)">Multi-gateway</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 13 · TESTIMONIALS
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s13">
+    <div class="chip chip-teal" id="s13c"><span class="pulsedot" style="background:var(--teal)"></span>Customer Stories</div>
+    <div class="h2" id="s13h">Trusted by growing <span class="hlteal">businesses</span></div>
+    <div class="sub" id="s13s">Teams across industries use Dynime to streamline operations, close more deals, and scale without chaos.</div>
+
+    <div style="display:flex;gap:14px;margin-top:26px;align-items:flex-start">
+      <div class="test-card" id="t1" style="transition-delay:.4s">
+        <div class="stars">★★★★★</div>
+        <div class="test-q">"Dynime replaced 5 different tools we were using. Our team productivity jumped 40% in the first month. The automation alone saves us 20 hours a week."</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="av" style="width:28px;height:28px;background:linear-gradient(135deg,#3B7EFF,#6B9FFF)"></div>
+          <div><div class="test-name">Rashed Karim</div><div class="test-role">CEO · DataBridge Ltd.</div></div>
+        </div>
+      </div>
+      <div class="test-card" id="t2" style="transition-delay:.55s">
+        <div class="stars">★★★★★</div>
+        <div class="test-q">"The CRM and accounting integration is a game changer. I see live revenue, outstanding invoices, and team performance all in one screen."</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="av" style="width:28px;height:28px;background:linear-gradient(135deg,#00D4AA,#00FFCC)"></div>
+          <div><div class="test-name">Priya Sharma</div><div class="test-role">Founder · GreenLeaf Studio</div></div>
+        </div>
+      </div>
+      <div class="test-card" id="t3" style="transition-delay:.7s">
+        <div class="stars">★★★★★</div>
+        <div class="test-q">"We onboarded our entire 38-person team in two days. The HR module handles payroll, attendance, and leave requests — all automated."</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="av" style="width:28px;height:28px;background:linear-gradient(135deg,#A78BFA,#C4B5FD)"></div>
+          <div><div class="test-name">Tanvir Hossain</div><div class="test-role">COO · NexGen Solutions</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:32px;margin-top:22px;opacity:0;transition:opacity .8s ease 1.2s" id="s13stats">
+      <div style="text-align:center"><div style="font-family:var(--fh);font-size:28px;font-weight:800;color:var(--teal)">500+</div><div style="font-size:9px;color:var(--muted);margin-top:2px">Companies</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="font-family:var(--fh);font-size:28px;font-weight:800;color:var(--blue)">4.9★</div><div style="font-size:9px;color:var(--muted);margin-top:2px">Avg Rating</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="font-family:var(--fh);font-size:28px;font-weight:800;color:var(--yellow)">98%</div><div style="font-size:9px;color:var(--muted);margin-top:2px">Retention Rate</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="font-family:var(--fh);font-size:28px;font-weight:800;color:var(--purple)">3x</div><div style="font-size:9px;color:var(--muted);margin-top:2px">ROI Average</div></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 14 · PRICING
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s14">
+    <div class="chip chip-yellow" id="s14c"><span class="pulsedot" style="background:var(--yellow)"></span>Pricing</div>
+    <div class="h2" id="s14h">Simple, transparent <span class="hlyellow">pricing</span></div>
+    <div class="sub" id="s14s">No hidden fees. No lock-in. Start free, scale as you grow. Every plan includes all 8 modules.</div>
+
+    <div style="display:flex;gap:14px;margin-top:26px;align-items:flex-start">
+      <div class="price-card" id="p1" style="transition-delay:.4s">
+        <div class="price-name">Starter</div>
+        <div class="price-val">$0<span style="font-size:14px;font-weight:400">/mo</span></div>
+        <div class="price-per">Up to 3 users · 14-day trial</div>
+        <div class="price-feat">
+          <span>CRM (50 contacts)</span>
+          <span>Basic invoicing</span>
+          <span>2 projects</span>
+          <span>Email support</span>
+        </div>
+        <div class="price-btn pbtn-ghost">Get Started Free</div>
+      </div>
+      <div class="price-card featured" id="p2" style="transition-delay:.55s">
+        <div style="font-size:8px;background:var(--blue);color:#fff;border-radius:4px;padding:2px 7px;display:inline-block;margin-bottom:8px;font-weight:600">MOST POPULAR</div>
+        <div class="price-name">Growth</div>
+        <div class="price-val">$49<span style="font-size:14px;font-weight:400">/mo</span></div>
+        <div class="price-per">Up to 15 users · Billed annually</div>
+        <div class="price-feat">
+          <span>All Starter features</span>
+          <span>Unlimited CRM & HRM</span>
+          <span>Full accounting suite</span>
+          <span>Workflow automation</span>
+          <span>Priority support</span>
+        </div>
+        <div class="price-btn pbtn-blue">Start Free Trial →</div>
+      </div>
+      <div class="price-card" id="p3" style="transition-delay:.7s">
+        <div class="price-name">Enterprise</div>
+        <div class="price-val">$149<span style="font-size:14px;font-weight:400">/mo</span></div>
+        <div class="price-per">Unlimited users · Custom setup</div>
+        <div class="price-feat">
+          <span>All Growth features</span>
+          <span>Custom integrations</span>
+          <span>Dedicated account mgr</span>
+          <span>SLA guarantee</span>
+          <span>On-premise option</span>
+        </div>
+        <div class="price-btn pbtn-ghost">Contact Sales</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SCENE 15 · FINAL CTA
+  ══════════════════════════════════════ -->
+  <div class="scene" id="s15">
+    <div style="text-align:center">
+      <div class="chip chip-teal" id="s15c" style="justify-content:center"><span class="pulsedot" style="background:var(--teal)"></span>Get Started Today</div>
+      <div style="font-family:var(--fh);font-size:58px;font-weight:800;letter-spacing:-2px;line-height:1.05;opacity:0;transform:translateY(20px);transition:all .9s cubic-bezier(.16,1,.3,1) .25s" id="s15h">
+        Simplify your<br><span style="background:linear-gradient(135deg,var(--blue),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent">growth execution.</span>
+      </div>
+      <div class="sub" id="s15s" style="margin-top:14px">Join 500+ businesses already running on Dynime. One platform. Every module. Zero complexity.</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:28px;opacity:0;transition:opacity .7s ease .8s" id="s15btns">
+        <a href="https://dynime.com" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue),#6B9FFF);color:#fff;border-radius:10px;padding:14px 28px;font-size:15px;font-weight:700;font-family:var(--fh);cursor:pointer;box-shadow:0 10px 36px rgba(59,126,255,.4);transition:transform .2s,box-shadow .2s" onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 16px 48px rgba(59,126,255,.5)'" onmouseleave="this.style.transform='';this.style.boxShadow='0 10px 36px rgba(59,126,255,.4)'">
+          Get Started Free →
+        </a>
+        <a href="https://dynime.com" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:14px 24px;font-size:15px;font-weight:600;font-family:var(--fh);cursor:pointer;transition:background .2s" onmouseenter="this.style.background='rgba(255,255,255,.12)'" onmouseleave="this.style.background='rgba(255,255,255,.07)'">
+          Watch Live Demo
+        </a>
+      </div>
+      <div style="margin-top:16px;font-size:11px;color:var(--muted);opacity:0;transition:opacity .7s ease 1.1s" id="s15fine">
+        No credit card required &nbsp;·&nbsp; 14-day free trial &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; dynime.com
+      </div>
+      <div style="display:flex;gap:20px;justify-content:center;margin-top:20px;opacity:0;transition:opacity .7s ease 1.4s" id="s15badges">
+        <div style="font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px">🔒 SOC 2 Type II</div>
+        <div style="font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px">🛡️ GDPR Compliant</div>
+        <div style="font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px">💳 PCI DSS Level 1</div>
+        <div style="font-size:9px;color:var(--muted);display:flex;align-items:center;gap:5px">🌐 99.9% Uptime SLA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ GLOBAL PROGRESS BAR ══ -->
+  <div id="gbar"></div>
+  <div id="gtime">0:00 / 3:10</div>
+
+  <!-- ══ CONTROLS ══ -->
+
+  <!-- ══ SUBTITLE BAR ══ -->
+  <div id="subtitle-bar" style="
+    position:absolute;bottom:46px;left:50%;transform:translateX(-50%);
+    width:820px;min-height:36px;display:flex;align-items:center;justify-content:center;
+    padding:0 20px;pointer-events:none;z-index:20;
+  ">
+    <div id="subtitle-text" style="
+      font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;
+      color:rgba(232,237,248,0.92);text-align:center;line-height:1.6;
+      text-shadow:0 1px 8px rgba(0,0,0,.9),0 0 20px rgba(0,0,0,.7);
+      background:rgba(6,10,18,0.72);backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,0.07);border-radius:8px;
+      padding:7px 18px;max-width:780px;
+      transition:opacity 0.35s ease;
+    "></div>
+  </div>
+
+  <!-- ══ GLOBAL PROGRESS BAR ══ -->
+  <div id="gbar"></div>
+  <div id="gtime">0:00 / 3:10</div>
+
+  <!-- ══ CONTROLS ══ -->
+  <div id="ctrl">
+    <button class="cbtn" id="cprev" title="Previous">◀</button>
+    <button class="cbtn" id="cplay" title="Play/Pause">⏸</button>
+    <button class="cbtn" id="cnext" title="Next">▶</button>
+    <div id="cdots" style="display:flex;gap:4px"></div>
+    <button class="cbtn" id="cvoice" title="Toggle Voice" style="background:rgba(0,212,170,.15);border-color:rgba(0,212,170,.3);color:var(--teal);font-size:13px">🔊</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  DYNIME DEMO — VOICE NARRATION ENGINE
+// ══════════════════════════════════════
+
+// ── SCENE CONFIG ──
+const SCENES = [
+  { id:'s0',  dur:8000,  title:'The Problem' },
+  { id:'s1',  dur:8000,  title:'Introducing Dynime' },
+  { id:'s2',  dur:10000, title:'Dashboard' },
+  { id:'s3',  dur:9000,  title:'CRM Pipeline' },
+  { id:'s4',  dur:9000,  title:'Contact Detail' },
+  { id:'s5',  dur:10000, title:'HRM' },
+  { id:'s6',  dur:10000, title:'Accounting' },
+  { id:'s7',  dur:10000, title:'Projects' },
+  { id:'s8',  dur:9000,  title:'Documents' },
+  { id:'s9',  dur:9000,  title:'Automation' },
+  { id:'s10', dur:10000, title:'Analytics' },
+  { id:'s11', dur:9000,  title:'Payments' },
+  { id:'s12', dur:8000,  title:'All Modules' },
+  { id:'s13', dur:10000, title:'Testimonials' },
+  { id:'s14', dur:10000, title:'Pricing' },
+  { id:'s15', dur:11000, title:'Get Started' },
+];
+
+// ── VOICE SCRIPTS ──
+const SCRIPTS = [
+  // s0 — Problem
+  "Is your business running on a dozen disconnected tools? Endless spreadsheets, separate CRMs, standalone accounting apps — data scattered everywhere, and your team wasting hours just switching between them. There has to be a better way.",
+
+  // s1 — Brand reveal
+  "Introducing Dynime — the all-in-one B2B business management platform built to simplify how you run, manage, and grow your company. Eight powerful modules. One unified platform. Infinite possibilities.",
+
+  // s2 — Dashboard
+  "Your Dynime command center gives you complete real-time visibility across your entire business. Revenue milestones, active clients, open tasks, and team performance — all in one beautiful, live dashboard.",
+
+  // s3 — CRM Pipeline
+  "The CRM module gives your sales team a visual pipeline to track every deal from the very first contact, all the way to a signed contract. Leads, follow-ups, proposals — nothing falls through the cracks.",
+
+  // s4 — CRM Contact
+  "Drill into any client contact for a complete relationship history. Every call, every email, every proposal, and every contract — captured in a clean activity timeline. You'll always know exactly where the relationship stands.",
+
+  // s5 — HRM
+  "Dynime's HR module manages your entire team lifecycle. Onboarding new hires, tracking daily attendance, reviewing performance, and processing payroll — all fully automated, always accurate, and beautifully organized.",
+
+  // s6 — Accounting
+  "Create professional invoices in seconds, track every expense, reconcile payments automatically, and get complete financial clarity — without ever touching a spreadsheet. Your finance team will thank you.",
+
+  // s7 — Projects
+  "Keep every project on track with powerful task management, Gantt timelines, and sprint planning. Assign tasks, set deadlines, and monitor team workloads — so every project delivers on time, every time.",
+
+  // s8 — Documents
+  "Store, organize, share, and sign documents securely — all in one place. With full version control and built-in e-signature support, your team always has the right file at the right time.",
+
+  // s9 — Automation
+  "Dynime's no-code workflow automation lets you build powerful rules that span every module. When a deal closes, automatically send a welcome email, create onboarding tasks, and notify your team. Set it once — and let it run twenty-four seven.",
+
+  // s10 — Analytics
+  "Make smarter, faster decisions with real-time analytics across every module. Revenue forecasts, conversion funnels, gross margins, team performance, and client retention — all visualized in powerful, actionable dashboards.",
+
+  // s11 — Payments
+  "Accept payments from anywhere in the world with native support for Stripe, PayPal, bKash, Nagad, and bank transfers. Every transaction is encrypted, P C I compliant, and settled automatically. Get paid faster, every single time.",
+
+  // s12 — All modules
+  "Eight powerful, deeply integrated modules — C R M, Human Resources, Accounting, Project Management, Documents, Workflow Automation, Analytics, and Payments. Each one powerful alone. Together, they transform how your business operates.",
+
+  // s13 — Testimonials
+  "Over five hundred businesses already trust Dynime to run their operations — earning a four point nine star average rating. Teams report a forty percent jump in productivity, and an average three-times return on investment within the first quarter.",
+
+  // s14 — Pricing
+  "Start for free and scale as you grow. Every Dynime plan includes all eight modules — no hidden fees, no tool switching, no compromises. From startup to enterprise, there's a plan built exactly for you.",
+
+  // s15 — CTA
+  "Ready to simplify your growth execution? Join over five hundred growing businesses on Dynime today. Start your free fourteen-day trial — no credit card required. Visit dynime dot com and transform how your business runs.",
+];
+
+// ── STATE ──
+const TOTAL = SCENES.reduce((a,s)=>a+s.dur,0);
+let cur=0, playing=true, raf=null, elapsed=0, segBase=0;
+let voiceOn=true, currentUtterance=null, subtitleTimer=null, wordTimers=[];
+
+// ── SUBTITLE ENGINE ──
+const subtitleEl = document.getElementById('subtitle-text');
+const subtitleBar = document.getElementById('subtitle-bar');
+
+function clearSubtitle(){
+  if(subtitleTimer)clearTimeout(subtitleTimer);
+  wordTimers.forEach(t=>clearTimeout(t));
+  wordTimers=[];
+  subtitleEl.style.opacity='0';
+  setTimeout(()=>{ subtitleEl.textContent=''; subtitleEl.style.opacity='1'; },350);
+}
+
+function showSubtitle(text){
+  clearSubtitle();
+  subtitleEl.style.opacity='1';
+  // Split into sentences for timed display
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  let offset = 0;
+  sentences.forEach((sent, si) => {
+    const trimmed = sent.trim();
+    const delay = si === 0 ? 300 : offset;
+    // Estimate reading time: ~140wpm = ~2.3 chars/sec → per sentence
+    const readMs = Math.max(2200, trimmed.length * 55);
+    const t = setTimeout(()=>{
+      subtitleEl.style.opacity='0';
+      setTimeout(()=>{
+        subtitleEl.textContent = trimmed;
+        subtitleEl.style.opacity='1';
+      },200);
+    }, delay);
+    wordTimers.push(t);
+    offset += readMs;
+  });
+}
+
+// ── WEB SPEECH API ──
+function speakScene(index){
+  if(!voiceOn) return;
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  if(currentUtterance){ currentUtterance=null; }
+
+  const text = SCRIPTS[index] || '';
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.92;
+  utt.pitch = 1.0;
+  utt.volume = 0.95;
+
+  // Pick a good English voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v=>
+    (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Alex'))
+    && v.lang.startsWith('en')
+  ) || voices.find(v=>v.lang.startsWith('en')) || voices[0];
+  if(preferred) utt.voice = preferred;
+
+  utt.onend = () => { currentUtterance=null; };
+  currentUtterance = utt;
+  // Small delay so scene animation starts first
+  setTimeout(()=>{
+    if(voiceOn && currentUtterance===utt){
+      window.speechSynthesis.speak(utt);
+    }
+  }, 400);
+}
+
+function pauseVoice(){
+  if(window.speechSynthesis) window.speechSynthesis.pause();
+}
+function resumeVoice(){
+  if(window.speechSynthesis) window.speechSynthesis.resume();
+}
+function stopVoice(){
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  clearSubtitle();
+}
+
+// Load voices (Chrome needs this async)
+if(window.speechSynthesis){
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener('voiceschanged',()=>{ window.speechSynthesis.getVoices(); });
+}
+
+// ── BLOBS ──
+const BLOBS=[
+  [.9,0,0,0],[.9,.8,0,0],[.7,.9,0,0],[.5,.8,.7,0],[0,.8,.7,.6],[.4,.7,.0,.8],[.6,.0,.8,.5],[.8,.6,.5,0],
+  [.7,.9,0,0],[.5,.8,.7,0],[0,.7,.9,.4],[.6,.8,0,.5],[.5,.5,.7,.6],[.9,.5,0,0],[.7,.4,.0,.8],[.8,.9,.5,.5]
+];
+function setBlobs(i){
+  const v=BLOBS[Math.min(i,BLOBS.length-1)];
+  ['b1','b2','b3','b4'].forEach((id,j)=>{ document.getElementById(id).style.opacity=v[j]; });
+  document.getElementById('grid').style.opacity=.7;
+}
+
+// ── DOTS ──
+const dotsEl=document.getElementById('cdots');
+SCENES.forEach((s,i)=>{
+  const d=document.createElement('div');
+  d.className='sdot'+(i===0?' on':'');
+  d.title=s.title;
+  d.addEventListener('click',()=>{
+    segBase=SCENES.slice(0,i).reduce((a,s)=>a+s.dur,0);
+    goTo(i);
+  });
+  dotsEl.appendChild(d);
+});
+
+function updateDots(){
+  dotsEl.querySelectorAll('.sdot').forEach((d,j)=>d.classList.toggle('on',j===cur));
+}
+function fmt(ms){ const s=Math.floor(ms/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+
+// ── SCENE ANIMATIONS ──
+function animateScene(i){
+  setBlobs(i);
+  const s=document.getElementById(SCENES[i].id);
+
+  const show=(...ids)=>ids.forEach((id,k)=>setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el){ el.classList.add('show'); el.style.opacity='1'; }
+  },80+k*140));
+
+  const animBars=(cid,delay=400)=>setTimeout(()=>{
+    document.querySelectorAll(`#${cid} .bar`).forEach((b,j)=>
+      setTimeout(()=>{ b.style.height=b.dataset.h; },j*70));
+  },delay);
+
+  const animPfills=(ids,delay=600)=>setTimeout(()=>ids.forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.width=el.dataset.w;
+  }),delay);
+
+  const showNotif=(id,delay=2800)=>setTimeout(()=>{
+    const el=document.getElementById(id); if(el) el.classList.add('show');
+  },delay);
+
+  if(i===0){ show('s0c','s0h','s0s'); document.getElementById('s0g').classList.add('show'); }
+  if(i===1){
+    setTimeout(()=>document.getElementById('s1pre').style.opacity=1,200);
+    setTimeout(()=>{ const l=document.getElementById('s1logo'); l.style.opacity=1; l.style.transform='none'; },450);
+    setTimeout(()=>document.getElementById('s1tag').style.opacity=1,1050);
+    setTimeout(()=>document.getElementById('s1stats').style.opacity=1,1450);
+  }
+  if(i===2){
+    show('s2c','s2h','s2s');
+    setTimeout(()=>document.getElementById('s2p').classList.add('show'),450);
+    animBars('s2p',900); animPfills(['s2pg1','s2pg2'],900); showNotif('s2n',3000);
+    setTimeout(()=>{ countUp('s2v1','$0','$84.2K',1500); countUp('s2v2','0','247',1500); countUp('s2v3','0','134',1500); },800);
+  }
+  if(i===3){ show('s3c','s3h','s3s'); setTimeout(()=>document.getElementById('s3p').classList.add('show'),450); showNotif('s3n'); }
+  if(i===4){ show('s4c','s4h','s4s'); setTimeout(()=>document.getElementById('s4p').classList.add('show'),450); }
+  if(i===5){ show('s5c','s5h','s5s'); setTimeout(()=>document.getElementById('s5p').classList.add('show'),450); animPfills(['s5p1','s5p2','s5p3','s5p4'],900); showNotif('s5n',3200); }
+  if(i===6){ show('s6c','s6h','s6s'); setTimeout(()=>document.getElementById('s6p').classList.add('show'),450); showNotif('s6n',2800); }
+  if(i===7){ show('s7c','s7h','s7s'); setTimeout(()=>document.getElementById('s7p').classList.add('show'),450); animPfills(['s7pg'],900); }
+  if(i===8){ show('s8c','s8h','s8s'); setTimeout(()=>document.getElementById('s8p').classList.add('show'),450); animPfills(['s8pg'],900); }
+  if(i===9){ show('s9c','s9h','s9s'); setTimeout(()=>document.getElementById('s9p').classList.add('show'),450); showNotif('s9n',2500); }
+  if(i===10){ show('s10c','s10h','s10s'); setTimeout(()=>document.getElementById('s10p').classList.add('show'),450); animPfills(['s10c1','s10c2','s10c3'],900); }
+  if(i===11){ show('s11c','s11h','s11s'); setTimeout(()=>document.getElementById('s11p').classList.add('show'),450); showNotif('s11n',2600); }
+  if(i===12){
+    show('s12c','s12h','s12s');
+    setTimeout(()=>{
+      const g=document.getElementById('s12g'); g.style.opacity=1; g.style.transform='none';
+      g.querySelectorAll('.card2').forEach((c,j)=>{
+        c.style.opacity=0; c.style.transform='translateY(12px)';
+        setTimeout(()=>{ c.style.transition='all .5s ease'; c.style.opacity=1; c.style.transform='none'; },500+j*60);
+      });
+    },500);
+  }
+  if(i===13){
+    show('s13c','s13h','s13s');
+    setTimeout(()=>{ ['t1','t2','t3'].forEach(id=>document.getElementById(id).classList.add('show')); },500);
+    setTimeout(()=>document.getElementById('s13stats').style.opacity=1,1400);
+  }
+  if(i===14){
+    show('s14c','s14h','s14s');
+    setTimeout(()=>{ ['p1','p2','p3'].forEach(id=>document.getElementById(id).classList.add('show')); },500);
+  }
+  if(i===15){
+    setTimeout(()=>document.getElementById('s15c').classList.add('show'),100);
+    setTimeout(()=>{ const h=document.getElementById('s15h'); h.style.opacity=1; h.style.transform='none'; },300);
+    show('s15s');
+    setTimeout(()=>document.getElementById('s15btns').style.opacity=1,800);
+    setTimeout(()=>document.getElementById('s15fine').style.opacity=1,1100);
+    setTimeout(()=>document.getElementById('s15badges').style.opacity=1,1400);
+  }
+
+  // ── VOICE + SUBTITLE for this scene ──
+  showSubtitle(SCRIPTS[i] || '');
+  speakScene(i);
+}
+
+// ── COUNTER ──
+function countUp(id,from,to,dur){
+  const el=document.getElementById(id); if(!el)return;
+  const startNum=parseFloat(from.replace(/[$K,]/g,''));
+  const endNum=parseFloat(to.replace(/[$K,]/g,''));
+  const isK=to.includes('K'), isDollar=to.includes('$');
+  const start=performance.now();
+  function tick(now){
+    const p=Math.min((now-start)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    const val=startNum+(endNum-startNum)*ease;
+    el.textContent=(isDollar?'$':'')+(isK?(val.toFixed(1)+'K'):(Math.round(val)));
+    if(p<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── RESET SCENE ──
+function resetScene(i){
+  const el=document.getElementById(SCENES[i].id);
+  el.querySelectorAll('.show').forEach(e=>e.classList.remove('show'));
+  el.querySelectorAll('.panel').forEach(e=>e.classList.remove('show'));
+  el.querySelectorAll('.notif').forEach(e=>e.classList.remove('show'));
+  el.querySelectorAll('.bar').forEach(b=>b.style.height='0%');
+  el.querySelectorAll('.pfill').forEach(f=>f.style.width='0%');
+  el.querySelectorAll('.test-card,.price-card').forEach(c=>c.classList.remove('show'));
+  const mg=el.querySelector('#s12g'); if(mg){ mg.style.opacity=0; mg.style.transform='translateY(16px)'; }
+  ['s1pre','s1logo','s1tag','s1stats','s15btns','s15fine','s15badges','s13stats'].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e&&el.contains(e)){ e.style.opacity=0; if(id==='s1logo')e.style.transform='scale(.9) translateY(16px)'; }
+  });
+  const h15=document.getElementById('s15h'); if(h15&&el.contains(h15)){ h15.style.opacity=0; h15.style.transform='translateY(20px)'; }
+}
+
+// ── SHOW SCENE ──
+function showScene(i, doAnim=true){
+  SCENES.forEach((s,j)=>{
+    const el=document.getElementById(s.id);
+    if(j===i){ el.classList.add('active'); if(doAnim) setTimeout(()=>animateScene(i),30); }
+    else if(el.classList.contains('active')){ el.classList.remove('active'); setTimeout(()=>resetScene(j),600); }
+  });
+  dotsEl.querySelectorAll('.sdot').forEach((d,j)=>d.classList.toggle('on',j===i));
+  document.getElementById('gtime').textContent=`${fmt(segBase)} / ${fmt(TOTAL)}`;
+}
+
+// ── PROGRESS LOOP ──
+function startProgress(duration){
+  const segStart=performance.now();
+  if(raf) cancelAnimationFrame(raf);
+  function tick(now){
+    if(!playing) return;
+    const e=now-segStart+elapsed;
+    const pct=Math.min(e/duration,1);
+    document.getElementById('gbar').style.width=(pct*100)+'%';
+    document.getElementById('gtime').textContent=`${fmt(Math.min(segBase+e,TOTAL))} / ${fmt(TOTAL)}`;
+    if(e>=duration){ nextScene(); } else { raf=requestAnimationFrame(tick); }
+  }
+  raf=requestAnimationFrame(tick);
+}
+
+function nextScene(){
+  if(cur<SCENES.length-1){ segBase+=SCENES[cur].dur; goTo(cur+1); }
+  else { segBase=0; goTo(0); }
+}
+
+function goTo(i){
+  stopVoice();
+  if(raf) cancelAnimationFrame(raf);
+  cur=i; elapsed=0;
+  document.getElementById('gbar').style.width='0%';
+  showScene(cur);
+  if(playing) startProgress(SCENES[cur].dur);
+}
+
+// ── CONTROLS ──
+document.getElementById('cprev').addEventListener('click',()=>{
+  segBase=SCENES.slice(0,Math.max(0,cur-1)).reduce((a,s)=>a+s.dur,0);
+  goTo(Math.max(0,cur-1));
+});
+document.getElementById('cnext').addEventListener('click',()=>{
+  segBase=SCENES.slice(0,Math.min(SCENES.length-1,cur+1)).reduce((a,s)=>a+s.dur,0);
+  goTo(Math.min(SCENES.length-1,cur+1));
+});
+document.getElementById('cplay').addEventListener('click',()=>{
+  playing=!playing;
+  document.getElementById('cplay').textContent=playing?'⏸':'▶';
+  if(playing){
+    resumeVoice();
+    startProgress(SCENES[cur].dur);
+  } else {
+    pauseVoice();
+    elapsed=performance.now()-performance.now(); // track elapsed
+    if(raf) cancelAnimationFrame(raf);
+  }
+});
+document.getElementById('cvoice').addEventListener('click',()=>{
+  voiceOn=!voiceOn;
+  const btn=document.getElementById('cvoice');
+  if(voiceOn){
+    btn.textContent='🔊';
+    btn.style.background='rgba(0,212,170,.15)';
+    btn.style.borderColor='rgba(0,212,170,.3)';
+    btn.style.color='var(--teal)';
+    subtitleBar.style.display='flex';
+    speakScene(cur);
+    showSubtitle(SCRIPTS[cur]||'');
+  } else {
+    btn.textContent='🔇';
+    btn.style.background='rgba(255,255,255,.06)';
+    btn.style.borderColor='var(--border)';
+    btn.style.color='var(--muted)';
+    stopVoice();
+    subtitleBar.style.display='none';
+  }
+});
+
+// ── INIT ──
+showScene(0);
+startProgress(SCENES[0].dur);
+</script>
+</body>
+</html>

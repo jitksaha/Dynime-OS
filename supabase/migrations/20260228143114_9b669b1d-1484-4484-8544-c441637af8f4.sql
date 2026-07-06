@@ -1,0 +1,25 @@
+
+-- Add comprehensive KYB fields to tenants table for global compliance
+ALTER TABLE public.tenants 
+  ADD COLUMN IF NOT EXISTS kyb_country TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_incorporation_date TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_tax_id TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_website TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_phone TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_email TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_city TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_state TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_postal_code TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_authorized_rep_name TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_authorized_rep_title TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_authorized_rep_email TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_authorized_rep_phone TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_authorized_rep_dob TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_beneficial_owners JSONB DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS kyb_documents JSONB DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS kyb_annual_revenue TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_employee_count TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_source_of_funds TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_purpose_of_account TEXT,
+  ADD COLUMN IF NOT EXISTS kyb_terms_accepted BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS kyb_terms_accepted_at TIMESTAMPTZ;
