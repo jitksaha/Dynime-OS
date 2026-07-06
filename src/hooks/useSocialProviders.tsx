@@ -14,14 +14,19 @@ export function useSocialProviders() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
-        .from("social_signin_providers")
-        .select("provider_key, provider_name, is_enabled")
-        .eq("is_enabled", true)
-        .in("provider_key", ["google", "apple"]);
+      try {
+        const { data } = await supabase
+          .from("social_signin_providers")
+          .select("provider_key, provider_name, is_enabled")
+          .eq("is_enabled", true)
+          .in("provider_key", ["google", "apple"]);
 
-      setProviders((data as SocialProvider[]) || []);
-      setLoading(false);
+        setProviders((data as SocialProvider[]) || []);
+      } catch {
+        // Supabase unavailable — no social providers shown
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 

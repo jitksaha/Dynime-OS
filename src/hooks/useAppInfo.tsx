@@ -32,20 +32,26 @@ export function AppInfoProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchAppInfo = useCallback(async () => {
-    const { data } = await supabase
-      .from("platform_settings")
-      .select("value")
-      .eq("key", "app_info")
-      .maybeSingle();
+    try {
+      const { data } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "app_info")
+        .maybeSingle();
 
-    if (data?.value) {
-      setAppInfo({ ...defaultAppInfo, ...(data.value as any) });
+      if (data?.value) {
+        setAppInfo({ ...defaultAppInfo, ...(data.value as any) });
+      }
+    } catch {
+      // Supabase unavailable — keep defaults
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchAppInfo();
+    const timer = setTimeout(() => setLoading(false), 6000);
+    fetchAppInfo().finally(() => clearTimeout(timer));
   }, [fetchAppInfo]);
 
   // Subscribe to realtime changes on platform_settings for app_info

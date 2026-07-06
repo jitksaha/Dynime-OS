@@ -31,19 +31,24 @@ export function WalletBalanceProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       return;
     }
-    const { data } = await supabase
-      .from("company_wallets")
-      .select("id, balance, currency")
-      .eq("tenant_id", profile.tenant_id)
-      .maybeSingle();
-    if (data) {
-      setBalance(Number((data as any).balance) || 0);
-      setCurrency((data as any).currency || "BDT");
-      setWalletId((data as any).id);
-    } else {
+    try {
+      const { data } = await supabase
+        .from("company_wallets")
+        .select("id, balance, currency")
+        .eq("tenant_id", profile.tenant_id)
+        .maybeSingle();
+      if (data) {
+        setBalance(Number((data as any).balance) || 0);
+        setCurrency((data as any).currency || "BDT");
+        setWalletId((data as any).id);
+      } else {
+        setBalance(null);
+      }
+    } catch {
       setBalance(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [profile?.tenant_id]);
 
   useEffect(() => {

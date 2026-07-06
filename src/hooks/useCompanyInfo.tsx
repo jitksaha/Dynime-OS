@@ -32,16 +32,21 @@ export function CompanyInfoProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchCompanyInfo = useCallback(async () => {
-    const { data } = await supabase
-      .from("platform_settings")
-      .select("value")
-      .eq("key", "company_info")
-      .maybeSingle();
+    try {
+      const { data } = await supabase
+        .from("platform_settings")
+        .select("value")
+        .eq("key", "company_info")
+        .maybeSingle();
 
-    if (data?.value) {
-      setCompanyInfo({ ...defaultCompanyInfo, ...(data.value as any) });
+      if (data?.value) {
+        setCompanyInfo({ ...defaultCompanyInfo, ...(data.value as any) });
+      }
+    } catch {
+      // Supabase unavailable — keep defaults
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
